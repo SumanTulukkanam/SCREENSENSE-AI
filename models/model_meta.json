@@ -1,0 +1,55 @@
+{
+  "trained_at": "2026-02-10T21:20:43.561699",
+  "n_samples": 5000,
+  "n_features": 16,
+  "feature_names": [
+    "total_screen_time_hr",
+    "social_media_hr",
+    "social_media_pct",
+    "top_app_hr",
+    "apps_used_count",
+    "unlock_count",
+    "late_night_unlocks",
+    "avg_session_min",
+    "total_notifications",
+    "social_notifications",
+    "social_notif_pct",
+    "browser_social_pct",
+    "late_night_browsing",
+    "unlock_per_hour",
+    "social_unlock_ratio",
+    "notification_response_rate"
+  ],
+  "risk_classes": [
+    "minimal",
+    "low",
+    "moderate",
+    "high"
+  ],
+  "risk_labels": {
+    "0": "Minimal Risk",
+    "1": "Low Risk",
+    "2": "Moderate Risk",
+    "3": "High Risk"
+  },
+  "cv_accuracy": 0.9974999999999999,
+  "test_accuracy": 0.9991666666666666,
+  "feature_importances": {
+    "social_media_hr": 0.2823332213051376,
+    "unlock_count": 0.20717909776268972,
+    "top_app_hr": 0.18543558959838136,
+    "total_screen_time_hr": 0.09312114504935788,
+    "social_media_pct": 0.08079619148876356,
+    "social_notifications": 0.04127567062188325,
+    "late_night_unlocks": 0.034579503763150575,
+    "late_night_browsing": 0.027033905344413797,
+    "total_notifications": 0.018222512136334537,
+    "browser_social_pct": 0.010972118229920351,
+    "notification_response_rate": 0.005300995748588027,
+    "social_notif_pct": 0.004917698802929754,
+    "avg_session_min": 0.003584762958755626,
+    "unlock_per_hour": 0.003411874640699833,
+    "social_unlock_ratio": 0.0016755995033895421,
+    "apps_used_count": 0.00016011304560459432
+  }
+}

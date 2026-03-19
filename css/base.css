@@ -1,0 +1,172 @@
+/* ============================================================
+   ScreenSense AI — base.css
+   Shared variables, reset, typography, utilities
+   Used by: index.html, dashboard.html
+   ============================================================ */
+
+/* ── Reset ── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Design Tokens ── */
+:root {
+  /* Backgrounds */
+  --bg:       #080810;
+  --surface:  #10101a;
+  --card:     #161624;
+  --card2:    #1c1c2e;
+
+  /* Borders */
+  --border:   #252538;
+  --border2:  #2e2e48;
+
+  /* Brand colours */
+  --accent:   #6c63ff;
+  --accent2:  #ff6b9d;
+  --accent3:  #00d4ff;
+  --accent4:  #ffb347;
+
+  /* Semantic colours */
+  --ok:       #00e5a0;
+  --warn:     #ffb347;
+  --danger:   #ff4f6d;
+  --green:    #00e5a0;
+  --red:      #ff4f6d;
+
+  /* Text */
+  --text:     #e8e8f2;
+  --text2:    #a0a0c0;
+  --muted:    #6868a0;
+  --muted2:   #9090c0;
+
+  /* Radius */
+  --r-sm:     8px;
+  --r-md:     12px;
+  --r-lg:     16px;
+  --r-xl:     20px;
+  --r-card:   28px;
+}
+
+/* ── Base ── */
+html, body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── Animated background grid ── */
+.bg-wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(108, 99, 255, .03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(108, 99, 255, .03) 1px, transparent 1px);
+  background-size: 44px 44px;
+  animation: bgDrift 25s linear infinite;
+}
+
+@keyframes bgDrift {
+  to { transform: translateY(44px); }
+}
+
+/* ── Ambient orbs ── */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  animation: orbFloat 10s ease-in-out infinite;
+}
+
+.o1 {
+  width: 500px; height: 500px;
+  top: -150px; left: -150px;
+  background: radial-gradient(circle, rgba(108, 99, 255, .18), transparent 65%);
+}
+
+.o2 {
+  width: 400px; height: 400px;
+  bottom: -100px; right: -100px;
+  background: radial-gradient(circle, rgba(255, 107, 157, .13), transparent 65%);
+  animation-delay: -5s;
+}
+
+.o3 {
+  width: 280px; height: 280px;
+  top: 40%; left: 55%;
+  background: radial-gradient(circle, rgba(0, 212, 255, .1), transparent 65%);
+  animation-delay: -2.5s;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(22px, -26px) scale(1.05); }
+  66%       { transform: translate(-16px, 18px) scale(.95); }
+}
+
+/* ── Pulse dot ── */
+.pdot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .35; }
+}
+
+/* ── Spinner ── */
+.spinner {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255, 255, 255, .3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .6s linear infinite;
+  vertical-align: middle;
+  margin-right: 7px;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Shared message/alert box ── */
+.msg {
+  margin-top: 14px;
+  padding: 11px 16px;
+  border-radius: var(--r-sm);
+  font-size: 12px;
+  text-align: left;
+  font-family: 'Space Mono', monospace;
+  display: none;
+  white-space: pre-wrap;
+  line-height: 1.7;
+}
+
+.msg.error   { background: rgba(255,  79, 109, .08); border: 1px solid rgba(255,  79, 109, .3); color: var(--danger); }
+.msg.success { background: rgba(  0, 229, 160, .08); border: 1px solid rgba(  0, 229, 160, .3); color: var(--ok); }
+.msg.info    { background: rgba(108,  99, 255, .08); border: 1px solid rgba(108,  99, 255, .3); color: var(--accent3); }
+.msg.warn    { background: rgba(255, 179,  71, .08); border: 1px solid rgba(255, 179,  71, .3); color: var(--warn); }
+
+/* ── Utility ── */
+.hidden { display: none !important; }

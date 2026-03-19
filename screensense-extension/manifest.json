@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "ScreenSense Web Tracker",
+  "version": "1.0",
+  "description": "Tracks browsing activity for ScreenSense analytics.",
+  "permissions": [
+    "tabs", "storage", "alarms"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "ScreenSense"
+  },
+  
+  "icons": {
+    "128": "icon.png"
+  },
+  "externally_connectable": {
+    "matches": ["http://127.0.0.1:5500/*"]
+  }
+}

@@ -1,0 +1,802 @@
+/* ============================================================
+   ScreenSense AI — index.css
+   Login / Home page styles
+   Requires: base.css loaded first
+   ============================================================ */
+
+/* ── Page layout ── */
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+/* ── Main card ── */
+.card {
+  width: 100%;
+  max-width: 520px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  padding: 44px 40px;
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgba(108, 99, 255, .07),
+    0 40px 100px rgba(0, 0, 0, .7);
+  animation: cardRise .55s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+@keyframes cardRise {
+  from { opacity: 0; transform: translateY(30px) scale(.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 15%; right: 15%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+
+/* ── Device / status badge (top-right of card) ── */
+.dev-badge {
+  position: absolute;
+  top: 20px; right: 24px;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-family: 'Space Mono', monospace;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all .4s;
+  background: rgba(108, 99, 255, .08);
+  border: 1px solid rgba(108, 99, 255, .2);
+  color: var(--muted2);
+}
+
+.dev-badge.connected {
+  background: rgba(0, 229, 160, .1);
+  border-color: rgba(0, 229, 160, .3);
+  color: var(--ok);
+}
+
+.dev-badge.error {
+  background: rgba(255, 79, 109, .08);
+  border-color: rgba(255, 79, 109, .2);
+  color: var(--danger);
+}
+
+/* ── Brand header ── */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+.brand-icon {
+  width: 48px; height: 48px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 0 24px rgba(108, 99, 255, .4);
+  flex-shrink: 0;
+}
+
+.brand-name {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+
+.brand-tag {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* ── Server status bar ── */
+.srv-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 22px;
+  font-size: 12px;
+  font-family: 'Space Mono', monospace;
+}
+
+.sdot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 7px;
+  flex-shrink: 0;
+}
+
+.sdot.on  { background: var(--ok);    box-shadow: 0 0 7px var(--ok); animation: pulse 1.5s ease-in-out infinite; }
+.sdot.off { background: var(--danger); }
+.sdot.chk { background: var(--muted); animation: pulse 1s ease-in-out infinite; }
+
+.sleft {
+  display: flex;
+  align-items: center;
+  color: var(--muted2);
+}
+
+/* ── Auth headings ── */
+h1 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -.6px;
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 24px;
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── Sign-in / Sign-up tabs ── */
+.tabs {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 4px;
+  margin-bottom: 24px;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: var(--r-sm);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .22s;
+}
+
+.tab-btn.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(108, 99, 255, .4);
+}
+
+/* ── Form fields ── */
+.fg {
+  margin-bottom: 16px;
+}
+
+label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 7px;
+  font-family: 'Space Mono', monospace;
+}
+
+.iw {
+  position: relative;
+}
+
+.iw .ic {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+input[type="email"],
+input[type="password"],
+input[type="text"] {
+  width: 100%;
+  padding: 13px 13px 13px 44px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 14px;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+
+input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, .15);
+}
+
+input::placeholder { color: var(--muted); }
+
+input[readonly] {
+  cursor: default;
+  opacity: .8;
+  padding: 10px 12px;
+}
+
+/* ── Buttons ── */
+.btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #8b6bff);
+  color: #fff;
+  margin-bottom: 14px;
+  box-shadow: 0 4px 20px rgba(108, 99, 255, .4);
+}
+
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(108, 99, 255, .5); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+.btn-google {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn-google:hover { background: var(--border); transform: translateY(-2px); }
+.btn-google svg  { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* ── Divider ── */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-family: 'Space Mono', monospace;
+}
+
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ── Forgot password link ── */
+.forgot {
+  text-align: right;
+  margin-top: -8px;
+  margin-bottom: 18px;
+}
+
+.lnk {
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+  background: none;
+  border: none;
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+}
+
+.lnk:hover { color: var(--accent3); }
+
+/* ── Password strength meter ── */
+.sb {
+  display: flex;
+  gap: 4px;
+  margin-top: 7px;
+}
+
+.ss {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background .3s;
+}
+
+.sl {
+  font-size: 11px;
+  font-family: 'Space Mono', monospace;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ── User panel ── */
+.user-panel { display: none; text-align: center; }
+
+.avatar {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  margin: 0 auto 12px;
+  display: block;
+  box-shadow: 0 0 20px rgba(108, 99, 255, .4);
+}
+
+.av-ph {
+  width: 68px; height: 68px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  font-weight: 800;
+  box-shadow: 0 0 20px rgba(108, 99, 255, .4);
+}
+
+.u-name  { font-size: 19px; font-weight: 800; margin-bottom: 3px; }
+.u-email { color: var(--muted); font-size: 12px; font-family: 'Space Mono', monospace; margin-bottom: 20px; }
+
+/* ── Device connection panel ── */
+.dev-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.dp-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fl {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Mode selection buttons ── */
+.mode-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.mode-btn {
+  padding: 16px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: transparent;
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all .2s;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.mode-btn .ico       { font-size: 26px; display: block; margin-bottom: 6px; }
+.mode-btn .mo-title  { font-size: 13px; font-weight: 700; font-family: 'Syne', sans-serif; display: block; margin-bottom: 2px; }
+.mode-btn .mo-sub    { font-size: 9px; color: var(--muted); display: block; }
+
+.mode-btn:hover {
+  border-color: var(--accent);
+  background: rgba(108, 99, 255, .06);
+}
+
+.mode-btn.active {
+  background: rgba(108, 99, 255, .14);
+  border-color: var(--accent);
+  box-shadow: 0 0 14px rgba(108, 99, 255, .2);
+}
+
+.mode-btn.active .mo-title { color: var(--accent); }
+
+/* ── WiFi setup section ── */
+.wifi-setup {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  line-height: 1.9;
+  display: none;
+}
+
+.wifi-setup b    { color: var(--text); }
+.wifi-setup code { background: rgba(108, 99, 255, .14); color: var(--accent3); padding: 2px 6px; border-radius: 4px; }
+
+.wifi-ip-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.wifi-ip-row input {
+  flex: 1;
+  padding: 9px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-family: 'Space Mono', monospace;
+  font-size: 12px;
+  outline: none;
+}
+
+.wifi-ip-row input:focus { border-color: var(--accent); }
+
+.wifi-ip-row button {
+  padding: 9px 14px;
+  background: rgba(108, 99, 255, .15);
+  border: 1px solid var(--accent);
+  border-radius: var(--r-sm);
+  color: var(--accent);
+  font-family: 'Syne', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+
+.wifi-ip-row button:hover { background: rgba(108, 99, 255, .25); }
+
+/* ── Connected device info card ── */
+.dev-info {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  display: none;
+}
+
+.di-row   { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+.di-label { font-family: 'Space Mono', monospace; color: var(--muted); font-size: 10px; }
+.di-val   { font-weight: 700; font-size: 13px; }
+
+.di-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ok);
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+}
+
+/* ── Notification info box ── */
+.notif-box {
+  background: rgba(0, 212, 255, .06);
+  border: 1px solid rgba(0, 212, 255, .2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font-size: 11px;
+  font-family: 'Space Mono', monospace;
+  color: var(--accent3);
+  line-height: 1.7;
+  display: none;
+}
+
+.notif-box b { color: var(--text); }
+
+/* ── Detect / Diagnose buttons ── */
+.conn-btn {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  margin-bottom: 8px;
+}
+
+.conn-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(108, 99, 255, .06);
+}
+
+.conn-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Start Analysis button ── */
+.analyse-btn {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all .2s;
+  box-shadow: 0 4px 24px rgba(108, 99, 255, .4);
+  letter-spacing: .3px;
+  display: none;
+}
+
+.analyse-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(108, 99, 255, .5);
+}
+
+.analyse-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+/* ── Progress panel ── */
+.progress-panel {
+  display: none;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: var(--r-md);
+  padding: 20px;
+  margin-top: 12px;
+  text-align: center;
+}
+
+.prog-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+  animation: progBounce 1.2s ease-in-out infinite;
+}
+
+@keyframes progBounce {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.1); }
+}
+
+.prog-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.prog-sub   { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 14px; }
+
+.prog-bar-wrap {
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.prog-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px;
+  width: 0;
+  transition: width .5s ease;
+}
+
+.prog-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+  text-align: left;
+}
+
+.prog-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-family: 'Space Mono', monospace;
+  color: var(--muted);
+  transition: color .3s;
+}
+
+.prog-step.done   { color: var(--ok); }
+.prog-step.active { color: var(--accent3); }
+.prog-step .si    { width: 16px; text-align: center; flex-shrink: 0; }
+
+/* ── Risk result panel ── */
+.risk-result {
+  display: none;
+  margin-top: 14px;
+  border-radius: var(--r-md);
+  padding: 20px 16px;
+  text-align: center;
+  animation: cardRise .4s ease both;
+}
+
+.risk-result.minimal  { background: rgba(  0, 229, 160, .07); border: 1px solid rgba(  0, 229, 160, .25); color: var(--ok);     }
+.risk-result.low      { background: rgba(108,  99, 255, .07); border: 1px solid rgba(108,  99, 255, .25); color: var(--accent); }
+.risk-result.moderate { background: rgba(255, 179,  71, .07); border: 1px solid rgba(255, 179,  71, .25); color: var(--warn);   }
+.risk-result.high     { background: rgba(255,  79, 109, .07); border: 1px solid rgba(255,  79, 109, .25); color: var(--danger); }
+
+.rnum   { font-size: 46px; font-weight: 800; letter-spacing: -2px; line-height: 1; }
+.rlabel { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; opacity: .85; }
+
+/* ── App usage pills ── */
+.app-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.app-pill {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-family: 'Space Mono', monospace;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .1);
+}
+
+.app-pill.social {
+  background: rgba(255, 79, 109, .1);
+  border-color: rgba(255, 79, 109, .25);
+  color: #ff8fa8;
+}
+
+/* ── Dashboard link ── */
+.dash-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--accent), #8b6bff);
+  color: #fff;
+  text-decoration: none;
+  padding: 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: 0 4px 20px rgba(108, 99, 255, .4);
+  transition: all .2s;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.dash-link:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(108, 99, 255, .5); }
+
+/* ── Sign out button ── */
+.btn-lo {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid rgba(255, 79, 109, .3);
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all .2s;
+}
+
+.btn-lo:hover { background: rgba(255, 79, 109, .08); }
+
+/* ── Diagnostic panel ── */
+#diagPanel {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  white-space: pre-wrap;
+  line-height: 1.7;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+#adbDebug {
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 8px;
+  padding: 10px;
+  margin-top: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  white-space: pre-wrap;
+}
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  .card { padding: 32px 22px; border-radius: 20px; }
+  .mode-row { grid-template-columns: 1fr 1fr; }
+  .rnum { font-size: 36px; }
+}
+
+/* ── Initially hidden elements (JS toggles these) ── */
+#signupForm,
+#sDiv,
+#sGoog         { display: none; }
+
+/* ── Server url label ── */
+.srv-url {
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── WiFi message line ── */
+#wifiMsg {
+  margin-top: 8px;
+  font-size: 10px;
+  display: none;
+}
+
+/* ── Diagnostics button (secondary style) ── */
+#diagBtn {
+  margin-top: 0;
+  background: transparent;
+  border-color: var(--border2);
+  color: var(--muted);
+  font-size: 12px;
+  padding: 9px;
+}
+
+/* ── Diagnostics output panel ── */
+#diagPanel {
+  display: none;
+  background: var(--card2);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 8px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  white-space: pre-wrap;
+  line-height: 1.7;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+/* ── Dashboard link hidden until analysis done ── */
+#dashLink { display: none; }

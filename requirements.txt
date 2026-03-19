@@ -1,0 +1,31 @@
+# ScreenSense AI — Python Dependencies
+# Install: pip install -r requirements.txt
+
+# ── Web Framework ──
+flask==3.0.0
+flask-cors==4.0.0
+
+# ── Firebase Admin SDK ──
+firebase-admin==6.4.0
+
+# ── ML & Data Science ──
+scikit-learn==1.4.0
+pandas==2.2.0
+numpy==1.26.3
+
+# ── HTTP Client (for collect.py → Flask) ──
+requests==2.31.0
+
+# ── ADB (for PC-mode collection) ──
+adb-shell==0.4.4
+pure-python-adb==0.3.0.dev0
+
+# ── Environment Variables ──
+python-dotenv==1.0.0
+
+# ── Database (SQLite for Chrome history) ──
+# Built into Python stdlib — no install needed
+
+# ── Utilities ──
+schedule==1.2.1        # for --loop auto-collection
+colorama==0.4.6        # colored terminal output

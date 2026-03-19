@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ScreenSense AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="css/base.css"/>
+  <link rel="stylesheet" href="css/index.css"/>
+
+  <link rel="icon" type="image/png" sizes="16x16" href="./assets/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./assets/android-chrome-512x512.png">
+<link rel="apple-touch-icon" href="./assets/apple-touch-icon.png">
+<link rel="icon" href="./assets/favicon.ico">
+</head>
+
+<div class="head" style="display: flex; align-items: center; justify-content: center; gap: 40px; width: 100%; background-color: transparent; padding: 8px 0; border-bottom: 1px solid rgba(46, 204, 113, 0.3); font-family: Verdana, Geneva, Tahoma, sans-serif;">
+    <div>
+        <img src="../assets/srm.jpg" alt="SRM Logo" style="height: 60px; width: auto; border-radius: 5px;">
+    </div>
+    <div style="display: flex; flex-direction: column; text-align: center; line-height: 1.2;">
+        <h2 style="margin: 0; font-size: 1rem; font-weight: bold; font-family: Verdana, Geneva, Tahoma, sans-serif;">SRM VALLIAMMAI ENGINEERING COLLEGE (An Autonomous Institution)</h2>
+        <h3 style="margin: 2px 0; font-size: 0.85rem; font-weight: 500; font-family: Verdana, Geneva, Tahoma, sans-serif;">DEPARTMENT OF ARTIFICIAL INTELLIGENCE AND DATA SCIENCE</h3>
+        <h4 style="margin: 2px 0; font-size: 0.9rem; color: #00b0e6ea; font-weight: 800; font-family: Verdana, Geneva, Tahoma, sans-serif;">AI-BASED DIGITAL ADDICTION & SCREEN-TIME BEHAVIOR ANALYZER</h4>
+    </div>
+    <div>
+        <img src="../assets/srm logo.jpg" alt="SRM Logo" style="height: 60px; width: auto; border-radius: 5px;">
+    </div>
+</div>
+    
+</div>
+<body>
+<div class="bg-wrap">
+  <div class="bg-grid"></div>
+  <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+</div>
+
+<div class="page">
+ <div class="card">
+
+  <div class="dev-badge" id="devBadge"><span class="pdot"></span><span id="devBadgeTxt">No device</span></div>
+
+  <div class="brand">
+   <div class="brand-icon">
+  <img src="./assets/favicon-32x32.png" alt="Logo">
+</div>
+    <div>
+      <div class="brand-name">ScreenSense AI</div>
+      <div class="brand-tag">Digital Wellbeing · v7</div>
+    </div>
+  </div>
+
+  <!-- AUTH PANEL -->
+  <div id="authPanel">
+    <h1>Welcome back</h1>
+    <p class="subtitle">// analyse · detect · improve</p>
+    <div class="srv-bar">
+      <div class="sleft"><span class="sdot chk" id="sDot"></span><span id="sTxt">Checking backend…</span></div>
+      <span class="srv-url">localhost:5000</span>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" type="button" onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn" type="button" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+    <!-- LOGIN -->
+    <form id="loginForm" onsubmit="handleEmailLogin(event)" novalidate autocomplete="on">
+      <div class="fg"><label>Email</label>
+        <div class="iw"><span class="ic">✉️</span><input type="email" id="lEmail" placeholder="you@example.com" autocomplete="email" required/></div></div>
+      <div class="fg"><label>Password</label>
+        <div class="iw"><span class="ic">🔒</span><input type="password" id="lPw" placeholder="••••••••" autocomplete="current-password" required/></div></div>
+      <div class="forgot"><button type="button" class="lnk" onclick="forgotPw()">Forgot password?</button></div>
+      <button type="submit" class="btn btn-primary" id="loginBtn"><span id="lBtnTxt">Sign In →</span></button>
+    </form>
+    <div class="divider" id="lDiv">or continue with</div>
+    <button class="btn btn-google" type="button" id="lGoog" onclick="googleLogin()">
+      <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+    <!-- SIGNUP -->
+    <form id="signupForm" onsubmit="handleEmailSignup(event)" novalidate autocomplete="on">
+      <div class="fg"><label>Full Name</label><div class="iw"><span class="ic">👤</span><input type="text" id="sName" placeholder="T. Suman" autocomplete="name" required/></div></div>
+      <div class="fg"><label>Email</label><div class="iw"><span class="ic">✉️</span><input type="email" id="sEmail" placeholder="you@srm.edu.in" autocomplete="email" required/></div></div>
+      <div class="fg"><label>Password</label>
+        <div class="iw"><span class="ic">🔒</span><input type="password" id="sPw" placeholder="Min. 6 characters" autocomplete="new-password" oninput="pwStrength(this.value)" required/></div>
+        <div class="sb"><div class="ss" id="s1"></div><div class="ss" id="s2"></div><div class="ss" id="s3"></div><div class="ss" id="s4"></div></div>
+        <div class="sl" id="slbl">Enter a password</div></div>
+      <button type="submit" class="btn btn-primary" id="signupBtn"><span id="sBtnTxt">Create Account →</span></button>
+    </form>
+    <div class="divider" id="sDiv">or continue with</div>
+    <button class="btn btn-google" type="button" id="sGoog" onclick="googleLogin()">
+      <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+    <div class="msg" id="authMsg"></div>
+  </div>
+
+  <!-- USER PANEL -->
+  <div class="user-panel" id="userPanel">
+    <div id="avatarWrap"></div>
+    <div class="u-name" id="uName">—</div>
+    <div class="u-email" id="uEmail">—</div>
+
+    <div class="dev-panel">
+      <div class="dp-title">🔌 Device Connection</div>
+
+      <!-- Connection mode -->
+      <div class="fl">Connection Type</div>
+      <div class="mode-row">
+        <button class="mode-btn active" id="mode-usb" onclick="setMode('usb')">
+          <span class="ico">🔌</span>
+          <span class="mo-title">USB Cable</span>
+          <span class="mo-sub">Phone plugged in</span>
+        </button>
+        <button class="mode-btn" id="mode-wifi" onclick="setMode('wifi')">
+          <span class="ico">📶</span>
+          <span class="mo-title">WiFi / Wireless</span>
+          <span class="mo-sub">No cable needed</span>
+        </button>
+      </div>
+
+      <!-- WiFi setup section -->
+      <div class="wifi-setup" id="wifiSetup">
+        <b>Step 1</b> — First connect phone via USB and click <b>Enable WiFi ADB</b><br>
+        <b>Step 2</b> — Disconnect USB cable<br>
+        <b>Step 3</b> — Enter your phone's WiFi IP below and connect<br><br>
+        <b>Find IP:</b> Phone Settings → About Phone → Status → IP Address
+        <div class="wifi-ip-row">
+          <input type="text" id="wifiIp" placeholder="192.168.1.x" maxlength="15"/>
+          <button onclick="enableWifiAdb()">Enable WiFi ADB</button>
+          <button onclick="connectWifi()">Connect</button>
+        </div>
+        <div id="wifiMsg"></div>
+      </div>
+
+      <!-- Device info (shown after connect) -->
+      <div class="dev-info" id="devInfo">
+        <div class="di-row">
+          <div>
+            <div class="di-label">Connected Device</div>
+            <div class="di-val" id="devModel">Unknown</div>
+          </div>
+          <div class="di-status"><span class="pdot"></span><span id="devStatus">Connected</span></div>
+        </div>
+      </div>
+
+      <!-- Notification info box -->
+      <div class="notif-box" id="notifBox">
+        <b>📲 How it works:</b><br>
+        When you click <b>Start Analysis</b>, your phone will receive a notification from ScreenSense AI asking permission to read usage data. The analysis will begin automatically.
+      </div>
+
+      <!-- Connect button -->
+      <button class="conn-btn" id="connBtn" onclick="connectDevice()">
+        🔍 Detect Device
+      </button>
+      <button class="conn-btn" id="diagBtn" onclick="runDiagnose()">
+        🔧 Run ADB Diagnostics
+      </button>
+      <div id="diagPanel"></div>
+
+      <!-- Start Analysis — shown only after device connected -->
+      <button class="analyse-btn" id="analyseBtn" onclick="startAnalysis()">
+        📊 Start Analysis
+      </button>
+
+      <!-- Progress panel -->
+      <div class="progress-panel" id="progPanel">
+        <div class="prog-icon" id="progIcon">📲</div>
+        <div class="prog-title" id="progTitle">Sending notification…</div>
+        <div class="prog-sub" id="progSub">Check your phone screen</div>
+        <div class="prog-bar-wrap"><div class="prog-bar-fill" id="progBar"></div></div>
+        <div class="prog-steps">
+          <div class="prog-step" id="step1"><span class="si">⏳</span> Sending consent notification to phone</div>
+          <div class="prog-step" id="step2"><span class="si">⏳</span> Waiting for acknowledgement (15s)</div>
+          <div class="prog-step" id="step3"><span class="si">⏳</span> Reading app usage data via ADB</div>
+          <div class="prog-step" id="step4"><span class="si">⏳</span> Running ML risk analysis</div>
+          <div class="prog-step" id="step5"><span class="si">⏳</span> Saving to Firestore</div>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div class="risk-result" id="riskResult">
+        <div class="rnum" id="rNum">—</div>
+        <div class="rlabel" id="rLbl">—</div>
+        <div class="app-list" id="rApps"></div>
+      </div>
+    </div>
+
+    <!-- Hidden marker used by JS to store last analysed device (may not exist in some views) -->
+    <input type="hidden" id="lastAnalysedDevice" value="">
+    <a href="html/dashboard.html" class="dash-link" id="dashLink">🚀 Open Dashboard</a>
+    <button class="btn-lo" onclick="doLogout()">Sign Out</button>
+  </div>
+
+ </div>
+</div>
+ <footer style="text-align: center; padding: 15px; background-color: rgba(245, 245, 245, 0); border-top: 1px solid rgba(46, 204, 113, 0.3); font-family: 'Segoe UI', Arial, sans-serif; color: #ffffff; font-size: 14px; line-height: 1.6; letter-spacing: 0.3px;">
+    <p style="margin: 5px 0; font-weight: 500;">Copyright © 2026 Department of Artificial Intelligence and Data Science, SRM Valliammai Engineering College</p>
+    <p style="margin: 5px 0; color: #ffffff; font-weight: 500;">
+        RAJESH P - 142222243037 | 
+        SANTHOSH M - 142222243040 | 
+        SUDHARSAN G - 142222243047 | 
+        SUMAN T - 142222243048
+    </p>
+</footer>
+<!-- FIREBASE MODULE -->
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+import{getAuth,GoogleAuthProvider,signInWithPopup,signInWithRedirect,getRedirectResult,signInWithEmailAndPassword,createUserWithEmailAndPassword,sendPasswordResetEmail,updateProfile,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+import{getFirestore,doc,setDoc,getDoc,updateDoc,serverTimestamp}from'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+const cfg={
+  apiKey: "AIzaSyCP0qBf4blmazVpaIygXG5w-E9l6sY2N1Y",
+  authDomain: "screensense-ai-f8fd9.firebaseapp.com",
+  projectId: "screensense-ai-f8fd9",
+  storageBucket: "screensense-ai-f8fd9.firebasestorage.app",
+  messagingSenderId: "788961774235",
+  appId: "1:788961774235:web:31156f26fc26d92bbd543e",
+  measurementId: "G-ER1T1Q5NZ9"
+};
+const APP=initializeApp(cfg),auth=getAuth(APP),db=getFirestore(APP),gp=new GoogleAuthProvider();
+function msg(m,t='error'){const e=document.getElementById('authMsg');e.textContent=m;e.className='msg '+t;e.style.display='block';if(t==='success')setTimeout(()=>e.style.display='none',4000)}
+function ldg(b,t,on,d){const B=document.getElementById(b),T=document.getElementById(t);if(B)B.disabled=on;if(T)T.innerHTML=on?'<span class="spinner"></span>Processing…':d}
+async function upsert(u){const r=doc(db,'users',u.uid),s=await getDoc(r);if(!s.exists())await setDoc(r,{uid:u.uid,name:u.displayName||'',email:u.email,photoURL:u.photoURL||'',createdAt:serverTimestamp(),lastLogin:serverTimestamp(),screenTimeData:{}});else await updateDoc(r,{lastLogin:serverTimestamp()})}
+function showUser(u){
+  document.getElementById('authPanel').style.display='none';
+  document.getElementById('userPanel').style.display='block';
+  document.getElementById('uName').textContent=u.displayName||'Welcome!';
+  document.getElementById('uEmail').textContent=u.email;
+  window._uid=u.uid;
+  const c=document.getElementById('avatarWrap');
+  c.innerHTML=u.photoURL?`<img src="${u.photoURL}" class="avatar"/>`:`<div class="av-ph">${(u.displayName||u.email||'U')[0].toUpperCase()}</div>`;
+  // Start server checks only now that the userPanel elements exist
+  if(typeof startServerChecks==='function') startServerChecks();
+}
+
+
+
+function fe(c){return({'auth/invalid-email':'Invalid email.','auth/user-not-found':'No account.','auth/wrong-password':'Wrong password.','auth/invalid-credential':'Invalid email or password.','auth/email-already-in-use':'Email already registered.','auth/weak-password':'Weak password.','auth/network-request-failed':'Network error.','auth/too-many-requests':'Too many attempts.'})[c]||'Error: '+c}
+getRedirectResult(auth).then(async r=>{if(r?.user){await upsert(r.user);msg('Signed in via Google! 🎉','success')}}).catch(e=>{if(e.code!=='auth/no-current-user')msg(fe(e.code))});
+onAuthStateChanged(auth, u => {
+  if (u) {
+    // ✅ Show logged-in UI
+    showUser(u);
+    // ── Multi-user: register this account so it appears in dashboard switcher ──
+    try {
+      const MU_KEY = 'ss_monitored_users';
+      const MA_KEY = 'ss_active_uid';
+      const existing = JSON.parse(localStorage.getItem(MU_KEY) || '[]');
+      const alreadyIn = existing.find(x => x.uid === u.uid);
+      if (!alreadyIn) {
+        existing.push({
+          uid:       u.uid,
+          name:      u.displayName || u.email?.split('@')[0] || 'User',
+          email:     u.email || '',
+          photoURL:  u.photoURL || '',
+          riskLevel: 'offline',
+          riskScore: 0,
+          addedAt:   Date.now()
+        });
+        localStorage.setItem(MU_KEY, JSON.stringify(existing));
+      }
+      // Set as active user if none set
+      if (!localStorage.getItem(MA_KEY)) {
+        localStorage.setItem(MA_KEY, u.uid);
+      }
+    } catch(e) { console.warn('Multi-user register failed:', e); }
+
+    // 🔥 Send UID to extension
+    try {
+      const EXTENSION_ID = "jmoneogjphgmmbibiccmldlokokjfcpb";
+
+      if (window.chrome && chrome.runtime) {
+        chrome.runtime.sendMessage(
+          EXTENSION_ID,
+          {
+            type: "SET_UID",
+            userId: u.uid
+          },
+          () => {
+            if (chrome.runtime.lastError) {
+              console.log("Extension not reachable.");
+            } else {
+              console.log("UID sent to extension");
+            }
+          }
+        );
+      }
+    } catch (err) {
+      console.log("Messaging failed:", err);
+    }
+
+  } else {
+
+    // ✅ Show login UI
+    document.getElementById('authPanel').style.display = 'block';
+    document.getElementById('userPanel').style.display = 'none';
+
+  }
+
+});
+window.handleEmailLogin=async e=>{e.preventDefault();const em=document.getElementById('lEmail').value.trim(),pw=document.getElementById('lPw').value;if(!em||!pw){msg('Fill in all fields.');return}ldg('loginBtn','lBtnTxt',true);try{const c=await signInWithEmailAndPassword(auth,em,pw);await upsert(c.user);msg('Signed in! ✅','success')}catch(err){msg(fe(err.code))}finally{ldg('loginBtn','lBtnTxt',false,'Sign In →')}};
+window.handleEmailSignup=async e=>{e.preventDefault();const n=document.getElementById('sName').value.trim(),em=document.getElementById('sEmail').value.trim(),pw=document.getElementById('sPw').value;if(!n||!em||!pw){msg('Fill in all fields.');return}if(pw.length<6){msg('Min 6 chars.');return}ldg('signupBtn','sBtnTxt',true);try{const c=await createUserWithEmailAndPassword(auth,em,pw);await updateProfile(c.user,{displayName:n});await upsert({...c.user,displayName:n});msg('Account created! 🎉','success')}catch(err){msg(fe(err.code))}finally{ldg('signupBtn','sBtnTxt',false,'Create Account →')}};
+window.googleLogin=async()=>{try{const c=await signInWithPopup(auth,gp);await upsert(c.user);msg('Signed in! 🎉','success')}catch(err){if(err.code==='auth/popup-blocked'||err.code==='auth/popup-cancelled'){msg('Popup blocked — redirecting…','info');await signInWithRedirect(auth,gp)}else if(err.code!=='auth/popup-closed-by-user'){msg(fe(err.code))}}};
+window.forgotPw=async()=>{const em=document.getElementById('lEmail').value.trim();if(!em){msg('Enter email first.','info');return}try{await sendPasswordResetEmail(auth,em);msg('Reset email sent! ✅','success')}catch(err){msg(fe(err.code))}};
+window.doLogout=async()=>{
+  // Remove signed-out user from monitored list and clear active uid
+  try {
+    const uid = auth.currentUser?.uid;
+    if (uid) {
+      const MU_KEY = 'ss_monitored_users';
+      const MA_KEY = 'ss_active_uid';
+      const users = JSON.parse(localStorage.getItem(MU_KEY)||'[]').filter(u=>u.uid!==uid);
+      localStorage.setItem(MU_KEY, JSON.stringify(users));
+      // Set next available user as active, or clear
+      localStorage.setItem(MA_KEY, users[0]?.uid || '');
+    }
+  } catch(e) {}
+  await signOut(auth);
+  msg('Signed out.','info');
+};
+</script>
+
+<!-- UI LOGIC -->
+<script>
+const F = `${window.location.protocol}//${window.location.hostname}:5000`;
+let currentMode='usb', connectedSerial=null, pollTimer=null;
+
+/* ── Tab switch ── */
+function switchTab(t){
+  const L=t==='login';
+  ['loginForm','lDiv','lGoog'].forEach(id=>document.getElementById(id).style.display=L?'block':'none');
+  document.getElementById('lDiv').style.display=L?'flex':'none';
+  document.getElementById('lGoog').style.display=L?'flex':'none';
+  ['signupForm','sDiv','sGoog'].forEach(id=>document.getElementById(id).style.display=L?'none':'block');
+  document.getElementById('sDiv').style.display=L?'none':'flex';
+  document.getElementById('sGoog').style.display=L?'none':'flex';
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',L?i===0:i===1));
+  document.getElementById('authMsg').style.display='none';
+}
+
+/* ── Password strength ── */
+function pwStrength(v){
+  let s=0;if(v.length>=6)s++;if(v.length>=10)s++;
+  if(/[A-Z]/.test(v)&&/[0-9]/.test(v))s++;if(/[^A-Za-z0-9]/.test(v))s++;
+  const c=['#ff4f6d','#ffb347','#6c63ff','#00e5a0'],l=['Too short','Weak','Good','Strong 💪'];
+  for(let i=1;i<=4;i++)document.getElementById('s'+i).style.background=i<=s?c[s-1]:'var(--border)';
+  document.getElementById('slbl').textContent=s>0?l[s-1]:'Enter a password';
+}
+
+/* ── Safe fetch with timeout (no AbortSignal.timeout — not supported everywhere) ── */
+function fetchWithTimeout(url,opts,ms){
+  return new Promise((res,rej)=>{
+    const ctrl=new AbortController();
+    const tid=setTimeout(()=>{ctrl.abort();rej(new Error('Request timed out'))},ms);
+    fetch(url,{...opts,signal:ctrl.signal})
+      .then(r=>{clearTimeout(tid);res(r)})
+      .catch(e=>{clearTimeout(tid);rej(e)});
+  });
+}
+
+/* ── Mode select ── */
+function setMode(m){
+  currentMode=m;
+  ['usb','wifi'].forEach(x=>document.getElementById('mode-'+x).classList.toggle('active',x===m));
+  document.getElementById('wifiSetup').style.display=m==='wifi'?'block':'none';
+  // Reset connection state
+  connectedSerial=null;
+  sessionStorage.removeItem('analysedDevice');
+  hideDeviceInfo(); hideAnalyseBtn();
+  const lbl=m==='usb'?'🔍 Detect Device':'📶 Check WiFi Connection';
+  document.getElementById('connBtn').textContent=lbl;
+  document.getElementById('connBtn').style.display='block';
+  document.getElementById('connBtn').disabled=false;
+}
+
+/* ── Server check ── */
+let _serverChecked=false;
+async function checkServer(){
+  const dot=document.getElementById('sDot'),txt=document.getElementById('sTxt');
+  if(!dot)return;
+  try{
+    const r=await fetchWithTimeout(F+'/api/status',{},4000);
+    if(r.ok){
+      const d=await r.json();
+      dot.className='sdot on';
+      // Show ADB status in the server bar
+      if(!d.adb_found){
+        txt.textContent='Backend ✓  |  ADB ❌ not found';
+      } else if(d.unauthorized&&d.unauthorized.length>0){
+        txt.textContent='Backend ✓  |  Phone: tap ALLOW';
+      } else if(d.devices&&d.devices.length>0){
+        txt.textContent='Backend ✓  |  '+d.devices[0].model+' connected';
+      } else {
+        txt.textContent='Backend online ✓';
+      }
+      // Auto-detect already connected device
+      if(d.devices&&d.devices.length>0&&!connectedSerial){
+        connectedSerial=d.devices[0].serial;
+        showDeviceInfo(d.devices[0]);
+      }
+    }else throw new Error();
+  }catch(e){
+    dot.className='sdot off';
+    txt.textContent=e.message==='Request timed out'?'Backend not responding — run app.py':'Backend offline — run: py app.py';
+  }
+}
+// Only run server check when userPanel is visible (called from showUser)
+let _serverTimer=null;
+function startServerChecks(){
+  checkServer();
+  if(!_serverTimer)_serverTimer=setInterval(checkServer,10000);
+}
+
+/* ── WiFi helpers ── */
+async function enableWifiAdb(){
+  const wm=document.getElementById('wifiMsg');
+  wm.style.display='block';wm.textContent='Enabling ADB over WiFi on phone…';wm.style.color='var(--accent3)';
+  try{
+    const r=await fetchWithTimeout(F+'/api/connect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'wifi_setup',serial:connectedSerial})},12000);
+    const d=await r.json();
+    if(d.success){
+      wm.style.color='var(--ok)';
+      wm.textContent='✅ WiFi ADB enabled! IP: '+d.device_ip+' — Disconnect USB then click Connect';
+      document.getElementById('wifiIp').value=d.device_ip||'';
+    }else{wm.style.color='var(--danger)';wm.textContent='❌ '+(d.error||'Failed')}
+  }catch(e){wm.style.color='var(--danger)';wm.textContent='❌ '+e.message}
+}
+
+async function connectWifi(){
+  const ip=document.getElementById('wifiIp').value.trim();
+  const wm=document.getElementById('wifiMsg');
+  if(!ip){wm.style.display='block';wm.style.color='var(--danger)';wm.textContent='Enter phone IP address first';return}
+  wm.style.display='block';wm.style.color='var(--accent3)';wm.textContent='Connecting to '+ip+':5555…';
+  try{
+    const r=await fetchWithTimeout(F+'/api/connect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'wifi',ip,port:5555})},18000);
+    const d=await r.json();
+    if(d.success){
+      wm.style.color='var(--ok)';wm.textContent='✅ Connected wirelessly to '+ip;
+      if(d.devices&&d.devices.length>0){connectedSerial=d.devices[0].serial;showDeviceInfo(d.devices[0]);}
+      else{wm.style.color='var(--warn)';wm.textContent='⚠️ Connected but no device listed — try Detect Device';}
+    }else{wm.style.color='var(--danger)';wm.textContent='❌ '+(d.message||'Could not connect to '+ip)}
+  }catch(e){wm.style.color='var(--danger)';wm.textContent='❌ '+e.message}
+}
+
+/* ── Detect USB device ── */
+async function connectDevice(){
+  const btn=document.getElementById('connBtn');
+  btn.disabled=true;
+  btn.textContent='⏳ Detecting…';
+  showInlineMsg('','');
+  connectedSerial=null; // Clear old device
+  try{
+    const r=await fetchWithTimeout(F+'/api/connect',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({mode:'usb'})},14000);
+    const d=await r.json();
+    if(d.success&&d.devices&&d.devices.length>0){
+      connectedSerial=d.devices[0].serial;
+      showDeviceInfo(d.devices[0]);
+    }else{
+      btn.disabled=false;
+      btn.textContent='🔄 Retry';
+      const raw=d.raw_output||'';
+      let hint='';
+      if(!d.adb_found){
+        hint=`❌ ADB not found in PATH.\n\nFix: Install Android Platform Tools → add to Windows PATH.\nDownload: developer.android.com/tools/releases/platform-tools`;
+      } else if(d.unauthorized&&d.unauthorized.length>0){
+        hint=`📱 Phone found but UNAUTHORIZED.\n\nFix: Unlock your phone → look for "Allow USB Debugging?" dialog → tap ALLOW.\nThen click Retry.`;
+      } else if(d.offline&&d.offline.length>0){
+        hint=`⚠️ Device found but OFFLINE.\n\nFix: Unplug and reconnect the USB cable. Make sure USB mode is "File Transfer" (MTP).`;
+      } else if(d.adb_found&&raw&&!raw.includes('device')){
+        hint=`⚠️ ADB running but no device listed.\n\nFix: On phone → Settings → Developer Options → USB Debugging → turn ON.\nMake sure cable is a data cable (not charge-only).`;
+      } else {
+        hint=`⚠️ No device detected.\n\nCheck:\n1. USB Debugging ON (Settings → Developer Options)\n2. Data cable (not charge-only)\n3. Phone shows "Allow USB Debugging?" → tap ALLOW\n4. Run in terminal: adb devices`;
+      }
+      showInlineMsg(hint,'warn');
+      if(raw){
+        let dbg=document.getElementById('adbDebug');
+        if(!dbg){
+          dbg=document.createElement('div');
+          dbg.id='adbDebug';
+          document.getElementById('inlineAlert').after(dbg);
+        }
+        dbg.textContent='ADB output:\n'+raw;
+        dbg.style.display='block';
+      }
+    }
+  }catch(e){
+    btn.disabled=false;
+    btn.textContent='🔄 Retry';
+    if(e.message==='Request timed out'||e.message.includes('fetch')||e.message.includes('NetworkError')||e.message.includes('Failed to fetch')){
+      showInlineMsg(`❌ Cannot reach backend.\n\nFix: Open a terminal in your project folder and run:\n  py app.py\n\nThen click Retry.`,'error');
+    }else{
+      showInlineMsg('❌ '+e.message,'error');
+    }
+  }
+}
+
+function showDeviceInfo(dev){
+  document.getElementById('devModel').textContent=dev.model||'Android Device';
+  document.getElementById('devStatus').textContent=dev.type==='wifi'?'📶 WiFi Connected':'🔌 USB Connected';
+  document.getElementById('devInfo').style.display='block';
+  document.getElementById('notifBox').style.display='block';
+  document.getElementById('connBtn').style.display='none';
+  showAnalyseBtn();
+  const b=document.getElementById('devBadge'),t=document.getElementById('devBadgeTxt');
+  b.className='dev-badge connected';
+  t.textContent=dev.type==='wifi'?'📶 WiFi':'🔌 USB';
+  showInlineMsg('','');
+}
+
+function hideDeviceInfo(){
+  document.getElementById('devInfo').style.display='none';
+  document.getElementById('notifBox').style.display='none';
+  document.getElementById('connBtn').style.display='block';
+  document.getElementById('connBtn').disabled=false;
+  document.getElementById('connBtn').textContent='🔍 Detect Device';
+  const b=document.getElementById('devBadge'),t=document.getElementById('devBadgeTxt');
+  b.className='dev-badge';t.textContent='No device';
+}
+
+function showAnalyseBtn(){document.getElementById('analyseBtn').style.display='block'}
+function hideAnalyseBtn(){document.getElementById('analyseBtn').style.display='none'}
+
+/* ── Inline message (safe — no .after() on hidden elements) ── */
+function showInlineMsg(m,type){
+  let el=document.getElementById('inlineAlert');
+  if(!el){
+    el=document.createElement('div');el.id='inlineAlert';
+    // Insert after connBtn inside devPanel
+    const ref=document.getElementById('analyseBtn');
+    if(ref&&ref.parentNode)ref.parentNode.insertBefore(el,ref.nextSibling);
+    else document.getElementById('devPanel')?.appendChild(el);
+  }
+  if(!m){el.style.display='none';return}
+  el.className='msg '+(type||'error');
+  el.textContent=m;el.style.display='block';el.style.marginTop='10px';
+  if(type==='ok'||type==='success')setTimeout(()=>el.style.display='none',5000);
+}
+
+/* ── Main: Start Analysis ── */
+async function startAnalysis(){
+  const uid=window._uid;
+  if(!uid){showInlineMsg('Sign in first.','error');return}
+  if(!connectedSerial){showInlineMsg('Connect a device first.','error');return}
+
+  document.getElementById('analyseBtn').style.display='none';
+  document.getElementById('riskResult').style.display='none';
+  document.getElementById('dashLink').style.display='none';
+  showInlineMsg('','');
+  _pollCount=0; // reset timeout counter
+  const pp=document.getElementById('progPanel');
+  pp.style.display='block';
+  setStep(1,'active');setStep(2,'');setStep(3,'');setStep(4,'');setStep(5,'');
+  setProgBar(5);
+  setProgIcon('📲','Sending notification to phone…','Check your phone — a ScreenSense notification will appear');
+
+  try{
+    // Store device marker to detect changes in dashboard
+    document.getElementById('lastAnalysedDevice').value=connectedSerial;
+    sessionStorage.setItem('analysedDevice',connectedSerial);
+    const r=await fetchWithTimeout(`${F}/api/trigger/${uid}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({serial:connectedSerial})},20000);
+    if(!r.ok){const e=await r.text();throw new Error('Server error '+r.status+': '+e);}
+    startPolling(uid);
+  }catch(e){
+    pp.style.display='none';
+    showAnalyseBtn();
+    showInlineMsg('❌ Failed to start: '+e.message,'error');
+  }
+}
+
+/* ══════════════════════════════════════════
+   POLLING ENGINE — v4 (bulletproof)
+   Uses recursive setTimeout so browser tab
+   throttling and async exceptions can't kill it.
+   Self-healing: watchdog restarts if interval dies.
+   ══════════════════════════════════════════ */
+let _polling=false;
+let _pollUid=null;
+let _pollTick=0;
+let _lastPollTime=0;
+const _POLL_MS=1500;
+const _POLL_MAX_TICKS=150; // 225s max
+
+function startPolling(uid){
+  stopPolling();
+  _polling=true;
+  _pollUid=uid;
+  _pollTick=0;
+  _lastPollTime=Date.now();
+  window._currentPollUid=uid;
+  _scheduleNext(0); // fire immediately
+}
+
+function stopPolling(){
+  _polling=false;
+  _pollUid=null;
+  if(pollTimer){clearTimeout(pollTimer);pollTimer=null;}
+}
+
+function _scheduleNext(delay){
+  if(!_polling)return;
+  if(pollTimer)clearTimeout(pollTimer);
+  pollTimer=setTimeout(_runPoll, delay);
+}
+
+async function _runPoll(){
+  if(!_polling||!_pollUid)return;
+  _pollTick++;
+  _lastPollTime=Date.now();
+
+  try{
+    // Timeout guard
+    if(_pollTick>_POLL_MAX_TICKS){
+      stopPolling();
+      document.getElementById('progPanel').style.display='none';
+      showAnalyseBtn();
+      showInlineMsg('❌ Timed out — check terminal for errors.\nRun: py app.py','error');
+      return;
+    }
+
+    // Fetch status
+    let d;
+    try{
+      const r=await fetchWithTimeout(`${F}/api/collection_status/${_pollUid}`,{},5000);
+      if(!r.ok){_scheduleNext(_POLL_MS);return;}
+      d=await r.json();
+    }catch(fetchErr){
+      // Network blip — retry
+      _scheduleNext(_POLL_MS);
+      return;
+    }
+
+    const st=d.status||'idle';
+
+    if(st==='notifying'){
+      setStep(1,'active');setProgBar(10);
+      setProgIcon('📲','Notifying phone…','Check your phone for the ScreenSense notification');
+    }
+    else if(st==='waiting_for_user'){
+      setStep(1,'done');setStep(2,'active');setProgBar(25);
+      const rem=Math.max(0,15-Math.round(_pollTick*_POLL_MS/1000));
+      setProgIcon('⏳','Waiting…',rem>0?`Auto-proceeding in ${rem}s`:'Proceeding…');
+    }
+    else if(st==='collecting'){
+      setStep(1,'done');setStep(2,'done');setStep(3,'active');setProgBar(65);
+      setProgIcon('📊','Reading phone data…','Collecting app usage via ADB…');
+    }
+    else if(st==='done'){
+      stopPolling();
+      setStep(1,'done');setStep(2,'done');setStep(3,'done');setStep(4,'done');setStep(5,'done');
+      setProgBar(100);
+      setProgIcon('✅','Done! Redirecting…','Opening dashboard…');
+      setTimeout(()=>{ window.location.href='html/dashboard.html'; },1500);
+      return; // don't reschedule
+    }
+    else if(st==='error'){
+      stopPolling();
+      document.getElementById('progPanel').style.display='none';
+      showAnalyseBtn();
+      const err=d.error||'Unknown error';
+      let hint=`❌ Collection failed:\n${err}`;
+      if(err.includes('ADB not found'))   hint+=`\n\nInstall platform-tools → C:\\platform-tools\\`;
+      if(err.includes('not connected'))   hint+=`\n\nCheck USB cable + USB Debugging on phone`;
+      showInlineMsg(hint,'error');
+      return; // don't reschedule
+    }
+
+    // Still running — schedule next tick
+    _scheduleNext(_POLL_MS);
+
+  }catch(anyErr){
+    // Catch-all: never let an exception kill the polling loop
+    console.error('doPoll error:',anyErr);
+    _scheduleNext(_POLL_MS);
+  }
+}
+
+// Watchdog: if polling should be running but last poll was >5s ago, restart it
+setInterval(()=>{
+  if(_polling&&_pollUid&&(Date.now()-_lastPollTime)>5000){
+    console.warn('Polling watchdog: restarting stalled poll');
+    _scheduleNext(0);
+  }
+},3000);
+
+// Re-poll instantly when tab becomes visible
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&_polling&&_pollUid) _scheduleNext(0);
+});
+
+/* ── Progress helpers ── */
+function setStep(n,state){
+  const el=document.getElementById('step'+n);
+  if(!el)return;
+  el.className='prog-step'+(state?' '+state:'');
+  el.querySelector('.si').textContent=state==='done'?'✅':state==='active'?'▶':'⏳';
+}
+function setProgBar(pct){document.getElementById('progBar').style.width=pct+'%'}
+function setProgIcon(icon,title,sub){
+  document.getElementById('progIcon').textContent=icon;
+  document.getElementById('progTitle').textContent=title;
+  document.getElementById('progSub').textContent=sub;
+}
+
+/* ── Show result ── */
+function showResult(data){
+  const score=+(data.risk_score??0);
+  const level=(data.risk_level||'low').toLowerCase();
+  const div=document.getElementById('riskResult');
+  div.className='risk-result '+level;
+  div.style.display='block';
+  document.getElementById('rNum').textContent=score+'/100';
+  document.getElementById('rLbl').textContent=data.prediction_label||'Analysis Complete';
+  const al=document.getElementById('rApps');al.innerHTML='';
+  (data.app_risks||[]).slice(0,8).forEach(a=>{
+    const p=document.createElement('span');
+    p.className='app-pill'+(a.is_social?' social':'');
+    p.textContent=(a.app_name||'App')+' '+(a.minutes||0)+'m';
+    al.appendChild(p);
+  });
+  const dl=document.getElementById('dashLink');
+  dl.style.display='flex';
+  dl.style.background='linear-gradient(135deg,'+(data.risk_color||'#6c63ff')+',#8b6bff)';
+  const b=document.getElementById('devBadge');
+  if(level==='high')b.style.cssText='background:rgba(255,79,109,.1);border-color:rgba(255,79,109,.3);color:var(--danger)';
+  else if(level==='moderate')b.style.cssText='background:rgba(255,179,71,.08);border-color:rgba(255,179,71,.25);color:var(--warn)';
+  showInlineMsg('','');
+}
+
+/* ── Run ADB Diagnostics ── */
+async function runDiagnose(){
+  const btn=document.getElementById('diagBtn');
+  const panel=document.getElementById('diagPanel');
+  btn.textContent='⏳ Running…';btn.disabled=true;
+  panel.style.display='block';
+  panel.textContent='Checking ADB status…';
+  try{
+    const r=await fetchWithTimeout(F+'/api/status',{},12000);
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    // /api/status returns: adb_found, adb_path, devices[], unauthorized[], offline[], raw_output, adb_verdict
+    let out='';
+    out+='ADB Found:   '+(d.adb_found?'YES':'NO')+'\n';
+    out+='ADB Path:    '+(d.adb_path||'not found')+'\n\n';
+    out+='── adb devices output ──\n';
+    out+=(d.raw_output&&d.raw_output.trim()?d.raw_output:'(no output — adb not found or no devices)')+'\n\n';
+    if(d.unauthorized&&d.unauthorized.length>0)
+      out+='⚠️ UNAUTHORIZED: '+d.unauthorized.join(', ')+'\n   → Tap ALLOW on phone!\n\n';
+    if(d.offline&&d.offline.length>0)
+      out+='⚠️ OFFLINE: '+d.offline.join(', ')+'\n   → Reconnect USB cable\n\n';
+    if(d.devices&&d.devices.length>0)
+      out+='✅ READY: '+d.devices.map(x=>(x.model||'Device')+' ('+x.serial+')').join(', ')+'\n\n';
+    out+='Verdict: '+(d.adb_verdict||'unknown');
+    panel.textContent=out;
+    // Auto-connect if device found
+    if(d.devices&&d.devices.length>0&&!connectedSerial){
+      connectedSerial=d.devices[0].serial;
+      showDeviceInfo(d.devices[0]);
+    }
+  }catch(e){
+    panel.textContent='❌ '+e.message+'\n\nMake sure app.py is running: py app.py';
+  }finally{
+    btn.textContent='🔧 Run ADB Diagnostics';btn.disabled=false;
+  }
+}
+
+/* ── Legacy showAlert shim (keep for safety) ── */
+function showAlert(m){showInlineMsg(m,'error');}
+</script>
+</body>
+</html>

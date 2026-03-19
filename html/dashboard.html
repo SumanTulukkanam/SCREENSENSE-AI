@@ -1,0 +1,3523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ScreenSense AI — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<link rel="stylesheet" href="../css/base.css"/>
+<link rel="stylesheet" href="../css/dashboard.css"/>
+<style>
+/* ── Modal max-height + scroll fix ─────────────────────────── */
+.modal-overlay { align-items: center !important; }
+.modal {
+  max-height: 80vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+.modal-head { flex-shrink: 0; }
+/* All scrollable modal bodies */
+.modal > div:not(.modal-head),
+.modal > .notif-list,
+#settingsModal .modal > div:not(.modal-head) {
+  overflow-y: auto !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+</style>
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="../assets/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../assets/android-chrome-512x512.png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<link rel="icon" href="../assets/favicon.ico">
+</head>
+
+<header><div class="head" style="display: flex; align-items: center; justify-content: center; gap: 40px; width: 100%; background-color: transparent; padding: 8px 0; border-bottom: 1px solid rgba(73, 65, 65, 0.6); font-family: Verdana, Geneva, Tahoma, sans-serif;">
+    <div>
+        <img src="../assets/srm.jpg" alt="SRM Logo" style="height: 60px; width: auto; border-radius: 5px;">
+    </div>
+    <div style="display: flex; flex-direction: column; text-align: center; line-height: 1.2;">
+        <h2 style="margin: 0; font-size: 1rem; font-weight: bold; font-family: Verdana, Geneva, Tahoma, sans-serif;">SRM VALLIAMMAI ENGINEERING COLLEGE (An Autonomous Institution)</h2>
+        <h3 style="margin: 2px 0; font-size: 0.85rem; font-weight: 500; font-family: Verdana, Geneva, Tahoma, sans-serif;">DEPARTMENT OF ARTIFICIAL INTELLIGENCE AND DATA SCIENCE</h3>
+        <h4 style="margin: 2px 0; font-size: 0.9rem; color: #00b0e6ea; font-weight: 800; font-family: Verdana, Geneva, Tahoma, sans-serif;">AI-BASED DIGITAL ADDICTION & SCREEN-TIME BEHAVIOR ANALYZER</h4>
+    </div>
+    <div>
+        <img src="../assets/srm logo.jpg" alt="SRM Logo" style="height: 60px; width: auto; border-radius: 5px;">
+    </div>
+</div></header>
+<body>
+
+<!-- ══════════════════════════════════════
+     ACCESS GATE
+════════════════════════════════════════ -->
+<div class="ag" id="ag">
+  <div class="ag-icon">🔒</div>
+  <h2>Access Restricted</h2>
+  <p>Sign in to view your dashboard.</p>
+  <a href="../index.html">← Back to Login</a>
+</div>
+
+<!-- ══════════════════════════════════════
+     LOADING OVERLAY
+════════════════════════════════════════ -->
+<div class="lo" id="lo">
+  <div class="lic">📱</div>
+  <div class="ltxt" id="ltxt">Loading ScreenSense AI…</div>
+  <div class="lbar"><div class="lf"></div></div>
+</div>
+
+<!-- Background decoration -->
+<div class="bg-grid"></div>
+<div class="orb oa"></div>
+<div class="orb ob"></div>
+
+<!-- ══════════════════════════════════════
+     NOTIFICATION MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="notifModal">
+  <div class="modal" style="max-width:780px;width:90vw">
+    <div class="modal-head">
+      <div class="modal-title">🔔 Notifications</div>
+      <button class="modal-close" onclick="closeModal('notifModal')">✕</button>
+    </div>
+    <div class="notif-list" id="notifList">
+      <div class="notif-item">
+        <div class="notif-ico">📊</div>
+        <div class="notif-body">
+          <div class="notif-title">Dashboard loaded</div>
+          <div class="notif-sub">Your usage data is ready to view</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DEVICE STATUS MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="deviceModal">
+  <div class="modal" style="max-width:780px;width:90vw">
+    <div class="modal-head">
+      <div class="modal-title">📱 Device Status</div>
+      <button class="modal-close" onclick="closeModal('deviceModal')">✕</button>
+    </div>
+    <div class="device-info">
+      <div class="device-dot disconnected" id="devDot"></div>
+      <div style="flex:1">
+        <div class="device-name" id="devName">Checking…</div>
+        <div class="device-serial" id="devSerial">—</div>
+      </div>
+      <div class="device-status-tag offline" id="devStatusTag">Offline</div>
+    </div>
+    <div class="device-actions" id="devActions" style="display:none">
+      <button class="dbtn" onclick="triggerCollection()">▶ Start Collection</button>
+      <button class="dbtn" onclick="openModal('deviceModal')">↺ Refresh</button>
+    </div>
+    <div id="devCollStatus" style="font-size:11px;color:var(--text2);display:none">
+      Collection status: <span id="devCollStatusTxt">—</span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SETTINGS MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="settingsModal">
+  <div class="modal" style="max-width:780px;width:90vw">
+    <div class="modal-head">
+      <div class="modal-title">⚙️ Settings</div>
+      <button class="modal-close" onclick="closeModal('settingsModal')">✕</button>
+    </div>
+    
+    <div style="display:flex;flex-direction:column;gap:8px;overflow-y:auto;flex:1;min-height:0;padding-right:2px">
+
+      <!-- Gmail Account -->
+      <div class="setting-row">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span>📧</span>
+          <div>
+            <div class="setting-label" id="gmailDisplayName">Loading…</div>
+            <div class="setting-sub" id="gmailDisplayEmail">—</div>
+          </div>
+        </div>
+        <button onclick="changeGmailAccount()" style="
+          background:rgba(108,99,255,.15);
+          border:1px solid rgba(108,99,255,.3);
+          color:#a78bfa;
+          border-radius:6px;
+          padding:4px 10px;
+          font-size:10px;
+          cursor:pointer;
+          font-family:inherit;
+          white-space:nowrap;
+        ">⇄ Change Gmail</button>
+      </div>
+
+      <div style="border-top:1px solid rgba(255,255,255,.06);margin:2px 0"></div>
+
+      <!-- Auto Refresh -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Auto Refresh</div>
+          <div class="setting-sub">Refresh data every 30 seconds</div>
+        </div>
+        <button class="toggle on" id="togAutoRefresh" onclick="toggleSetting(this,'autoRefresh')"></button>
+      </div>
+
+      <!-- Dark Mode -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Dark Mode</div>
+          <div class="setting-sub">Always on for this dashboard</div>
+        </div>
+        <button class="toggle on" disabled></button>
+      </div>
+
+      <!-- Risk Alert Threshold -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Risk Alert Threshold</div>
+          <div class="setting-sub">Notify above this score</div>
+        </div>
+        <select class="sel" id="riskThresholdSel" onchange="saveSetting('riskThreshold',this.value)">
+          <option value="50">50</option>
+          <option value="60">60</option>
+          <option value="70" selected>70</option>
+          <option value="80">80</option>
+          <option value="90">90</option>
+        </select>
+      </div>
+
+      <!-- Daily Screen Limit -->
+       <div style="border-top:1px solid rgba(255,255,255,.06);margin:4px 0"></div>
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;padding:4px 0">🧠 ML Model Weights</div>
+
+      <!-- Screen Time Weight -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Screen Time Weight</div>
+          <div class="setting-sub">Impact of daily usage on risk score</div>
+        </div>
+        <select class="sel" id="mlStWeight" onchange="saveMLConfig('screen_time_max', this.value)">
+          <option value="6">6h max</option>
+          <option value="8" selected>8h max</option>
+          <option value="10">10h max</option>
+          <option value="12">12h max</option>
+        </select>
+      </div>
+
+      <!-- Social Media Sensitivity -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Social Media Sensitivity</div>
+          <div class="setting-sub">% threshold for high social risk</div>
+        </div>
+        <select class="sel" id="mlSocWeight" onchange="saveMLConfig('social_pct_max', this.value)">
+          <option value="40">40%</option>
+          <option value="60">60%</option>
+          <option value="80" selected>80%</option>
+        </select>
+      </div>
+
+      <!-- Unlock Sensitivity -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Unlock Sensitivity</div>
+          <div class="setting-sub">Max unlocks before max risk</div>
+        </div>
+        <select class="sel" id="mlUnlockWeight" onchange="saveMLConfig('unlock_max', this.value)">
+          <option value="60">60</option>
+          <option value="80">80</option>
+          <option value="120" selected>120</option>
+          <option value="150">150</option>
+        </select>
+      </div>
+
+      <!-- Night Usage -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Night Usage Sensitivity</div>
+          <div class="setting-sub">% late-night use = max risk</div>
+        </div>
+        <select class="sel" id="mlNightWeight" onchange="saveMLConfig('night_pct_max', this.value)">
+          <option value="20">Strict (20%)</option>
+          <option value="30" selected>Normal (30%)</option>
+          <option value="50">Relaxed (50%)</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Daily Screen Limit (hrs)</div>
+          <div class="setting-sub">Warn when exceeded</div>
+        </div>
+        <select class="sel" id="screenLimitSel" onchange="saveSetting('screenLimit',this.value)">
+          <option value="4">4h</option>
+          <option value="5">5h</option>
+          <option value="6" selected>6h</option>
+          <option value="7">7h</option>
+          <option value="8">8h</option>
+        </select>
+      </div>
+
+      <div style="border-top:1px solid rgba(255,255,255,.06);margin:4px 0"></div>
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;padding:4px 0">📲 Alert Contact</div>
+
+      <!-- WhatsApp / Mobile Number -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">WhatsApp / Mobile Number</div>
+          <div class="setting-sub">Used for app overuse & risk alerts (include country code)</div>
+        </div>
+        <input id="settingsMobileNumber" type="tel" placeholder="+91XXXXXXXXXX"
+          oninput="savePhoneNumber(this.value)"
+          style="
+            background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+            color:var(--text1);border-radius:7px;padding:5px 10px;font-size:11px;
+            font-family:inherit;width:150px;outline:none;
+            transition:border-color .2s
+          ">
+      </div>
+
+      <!-- Push Token (for real Android popup) -->
+   
+
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     GOALS MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="goalsModal">
+  <div class="modal" style="max-width:780px;width:90vw">
+    <div class="modal-head">
+      <div class="modal-title">🎯 Goals</div>
+      <button class="modal-close" onclick="closeModal('goalsModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:8px" id="goalsList">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     AI INSIGHTS MODAL  ← NEW
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="aiInsightsModal">
+  <div class="modal" style="max-width:780px;width:90vw">
+    <div class="modal-head">
+      <div class="modal-title">✨ AI Insights</div>
+      <button class="modal-close" onclick="closeModal('aiInsightsModal')">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:.08em">🧠 AI-POWERED USAGE ANALYSIS</div>
+      <button onclick="loadAIInsightsModal(true)" id="aiInsRefreshBtn" style="
+        background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);
+        color:#a78bfa;border-radius:6px;padding:3px 10px;font-size:10px;
+        cursor:pointer;font-family:inherit;letter-spacing:.05em">↺ Refresh</button>
+    </div>
+    <div id="aiInsightsBody" style="display:flex;flex-direction:column;gap:10px">
+      <div style="color:var(--text2);font-size:12px;text-align:center;padding:24px">
+        <div style="font-size:28px;margin-bottom:8px">🧠</div>
+        Loading AI insights…
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     RISK REPORT MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="riskModal">
+  <div class="modal" style="max-width:780px;width:90vw">
+    <div class="modal-head">
+      <div class="modal-title">⚠️ Risk Report</div>
+      <button class="modal-close" onclick="closeModal('riskModal')">✕</button>
+    </div>
+    <div id="riskReportBody" style="display:flex;flex-direction:column;gap:10px">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PREDICTIONS MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="predictionsModal">
+  <div class="modal" style="max-width:780px;width:90vw;">
+    <div class="modal-head">
+      <div class="modal-title">🧠 ML Predictions</div>
+      <button class="modal-close" onclick="closeModal('predictionsModal')">✕</button>
+    </div>
+    <div id="predictionsBody" style="display:flex;flex-direction:column;gap:12px;max-height:80vh;overflow-y:auto;padding-right:4px">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     HISTORY MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="historyModal">
+  <div class="modal" style="max-width:780px;width:90vw">
+    <div class="modal-head">
+      <div class="modal-title">🌐 Browsing History</div>
+      <button class="modal-close" onclick="closeModal('historyModal')">✕</button>
+    </div>
+     
+    <div id="historyBody" style="max-height:620px;overflow:auto;font-size:12px;">
+      Loading…
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     WHATSAPP ALERT MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="whatsappModal">
+  <div class="modal" style="max-width:780px;width:90vw">
+    <div class="modal-head">
+      <div class="modal-title">💬 WhatsApp Alert</div>
+      <button class="modal-close" onclick="closeModal('whatsappModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.25);border-radius:10px;padding:12px 14px">
+        <div style="font-size:10px;color:#25d366;font-weight:700;letter-spacing:.08em;margin-bottom:6px">💬 WHATSAPP NOTIFICATION SERVICE</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6">Send an instant WhatsApp message alert to yourself or a guardian when risk thresholds are exceeded or inappropriate content is detected.</div>
+      </div>
+
+      <!-- Phone number input -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">WhatsApp Number</div>
+          <div class="setting-sub">Include country code (e.g. +91XXXXXXXXXX)</div>
+        </div>
+        <input id="waPhoneInput" type="tel" placeholder="+91XXXXXXXXXX" style="
+          background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);
+          color:var(--text1);border-radius:7px;padding:5px 10px;font-size:11px;
+          font-family:inherit;width:160px;outline:none">
+      </div>
+
+      <!-- Trigger type -->
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-top:4px;letter-spacing:.08em">⚡ ALERT TRIGGERS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="waTriggerGrid">
+        <label class="wa-trigger-opt" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px;cursor:pointer">
+          <input type="checkbox" id="waTrigRisk" checked style="accent-color:#6c63ff"> <span style="font-size:11px;color:var(--text2)">🧠 High Risk Score (&gt;70)</span>
+        </label>
+        <label class="wa-trigger-opt" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px;cursor:pointer">
+          <input type="checkbox" id="waTrigScreen" checked style="accent-color:#6c63ff"> <span style="font-size:11px;color:var(--text2)">⏱️ Screen Limit Exceeded</span>
+        </label>
+        <label class="wa-trigger-opt" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px;cursor:pointer">
+          <input type="checkbox" id="waTrigAppOveruse" checked style="accent-color:#ffb347"> <span style="font-size:11px;color:var(--text2)">📱 App Overuse (&gt;2h single app)</span>
+        </label>
+        <label class="wa-trigger-opt" style="display:flex;align-items:center;gap:8px;background:rgba(255,79,109,.06);border:1px solid rgba(255,79,109,.2);border-radius:8px;padding:10px;cursor:pointer">
+          <input type="checkbox" id="waTrigAdult" checked style="accent-color:#ff4f6d"> <span style="font-size:11px;color:#ff4f6d">🔞 Inappropriate Website Detected</span>
+        </label>
+        <label class="wa-trigger-opt" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px;cursor:pointer">
+          <input type="checkbox" id="waTrigSocial" checked style="accent-color:#6c63ff"> <span style="font-size:11px;color:var(--text2)">📲 Social Media Overuse (&gt;40%)</span>
+        </label>
+        <label class="wa-trigger-opt" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px;cursor:pointer">
+          <input type="checkbox" id="waTrigNight" style="accent-color:#6c63ff"> <span style="font-size:11px;color:var(--text2)">🌙 Late Night Usage (&gt;20%)</span>
+        </label>
+      </div>
+
+      <!-- Preview message -->
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:.08em">📋 MESSAGE PREVIEW</div>
+      <div id="waPreview" style="
+        background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.15);
+        border-radius:10px;padding:12px;font-size:11px;color:var(--text2);
+        line-height:1.7;font-family:'Space Mono',monospace;white-space:pre-wrap
+      ">Loading preview…</div>
+
+      <!-- Action buttons -->
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button onclick="sendWhatsAppAlert()" id="waSendBtn" style="
+          flex:1;background:rgba(37,211,102,.15);border:1px solid rgba(37,211,102,.35);
+          color:#25d366;border-radius:8px;padding:9px;font-size:12px;font-weight:700;
+          cursor:pointer;font-family:inherit;letter-spacing:.05em">
+          💬 Send WhatsApp Alert Now
+        </button>
+       
+      </div>
+      <div id="waStatus" style="font-size:11px;text-align:center;display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ANDROID POPUP MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="androidPushModal">
+  <div class="modal" style="max-width:780px;width:90vw">
+    <div class="modal-head">
+      <div class="modal-title">🔔 Android Popup Notification</div>
+      <button class="modal-close" onclick="closeModal('androidPushModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="background:rgba(108,99,255,.08);border:1px solid rgba(108,99,255,.25);border-radius:10px;padding:12px 14px">
+        <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:.08em;margin-bottom:6px">🔔 ANDROID PUSH NOTIFICATION</div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6">Sends a high-priority heads-up notification directly to the connected Android device. Appears as a popup overlay — even on the lock screen.</div>
+      </div>
+
+      <!-- Notification preview mockup -->
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:.08em">📱 NOTIFICATION PREVIEW</div>
+      <div style="
+        background:#1a1a2e;border:1px solid rgba(255,255,255,.1);border-radius:12px;
+        padding:14px;display:flex;gap:12px;align-items:flex-start;
+        box-shadow:0 4px 20px rgba(0,0,0,.4)
+      ">
+        <div style="
+          width:36px;height:36px;border-radius:8px;background:rgba(108,99,255,.3);
+          display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0
+        ">📱</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700;color:var(--text1);margin-bottom:3px" id="pushPreviewTitle">ScreenSense Alert</div>
+          <div style="font-size:11px;color:var(--text2);line-height:1.5" id="pushPreviewBody">Loading message…</div>
+          <div style="font-size:9px;color:var(--text2);margin-top:6px;opacity:.6">ScreenSense AI · just now</div>
+        </div>
+      </div>
+
+      <!-- Custom message toggle -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Custom Message</div>
+          <div class="setting-sub">Override with your own notification text</div>
+        </div>
+        <button class="toggle" id="togCustomMsg" onclick="toggleCustomMsg(this)"></button>
+      </div>
+      <textarea id="customPushMsg" placeholder="Type your custom notification message…" style="
+        display:none;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+        color:var(--text1);border-radius:8px;padding:10px;font-size:11px;font-family:inherit;
+        resize:vertical;min-height:70px;width:100%;box-sizing:border-box;outline:none
+      "></textarea>
+
+      <!-- Priority -->
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">Notification Priority</div>
+          <div class="setting-sub">High = heads-up popup, Default = silent</div>
+        </div>
+        <select class="sel" id="pushPriority">
+          <option value="high" selected>🔴 High (Heads-Up)</option>
+          <option value="default">🔵 Default</option>
+          <option value="low">⚪ Low (Silent)</option>
+        </select>
+      </div>
+
+      <!-- Adult/inappropriate site alert toggle -->
+      <div style="
+        background:rgba(255,79,109,.06);border:1px solid rgba(255,79,109,.2);
+        border-radius:10px;padding:12px 14px
+      ">
+        <div class="setting-row" style="margin:0">
+          <div>
+            <div class="setting-label" style="color:#ff4f6d">🔞 Inappropriate Site Alert</div>
+            <div class="setting-sub">Auto-push when adult/harmful websites detected in browsing history</div>
+          </div>
+          <button class="toggle on" id="togAdultAlert" onclick="this.classList.toggle('on')"></button>
+        </div>
+      </div>
+
+      <!-- Send buttons -->
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button onclick="sendAndroidPush()" id="pushSendBtn" style="
+          flex:1;background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.35);
+          color:#a78bfa;border-radius:8px;padding:9px;font-size:12px;font-weight:700;
+          cursor:pointer;font-family:inherit;letter-spacing:.05em">
+          🔔 Send Push Now
+        </button>
+        <button onclick="sendAdultContentAlert()" style="
+          background:rgba(255,79,109,.1);border:1px solid rgba(255,79,109,.3);
+          color:#ff4f6d;border-radius:8px;padding:9px 14px;font-size:11px;font-weight:700;
+          cursor:pointer;font-family:inherit;white-space:nowrap">
+          🔞 Scan & Alert
+        </button>
+      </div>
+      <div id="pushStatus" style="font-size:11px;text-align:center;display:none"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     DEEP ANALYSIS MODAL
+════════════════════════════════════════ -->
+<div class="modal-overlay" id="deepAnalysisModal">
+  <div class="modal" style="max-width:780px;width:90vw">
+    <div class="modal-head">
+      <div class="modal-title">🔬 Deep Analysis</div>
+      <button class="modal-close" onclick="closeModal('deepAnalysisModal')">✕</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:.08em">📊 FULL BEHAVIOURAL CATEGORIZATION</div>
+      <button onclick="loadDeepAnalysis(true)" id="deepRefreshBtn" style="
+        background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);
+        color:#a78bfa;border-radius:6px;padding:3px 10px;font-size:10px;
+        cursor:pointer;font-family:inherit">↺ Refresh</button>
+    </div>
+    <div id="deepAnalysisBody" style="display:flex;flex-direction:column;gap:14px;max-height:68vh;overflow-y:auto;padding-right:4px">
+      <div style="color:var(--text2);font-size:12px;text-align:center;padding:24px">
+        <div style="font-size:28px;margin-bottom:8px">🔬</div>Loading deep analysis…
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN SHELL  (hidden until auth ready)
+════════════════════════════════════════ -->
+<div class="shell" id="shell">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+  <div class="logo">
+    <div class="logo-ico"><img src="../assets/favicon-32x32.png" alt="Logo"></div>
+    <div>
+      <div class="logo-name">ScreenSense</div>
+      <div class="logo-sub">AI Analyzer</div>
+    </div>
+  </div>
+
+  <!-- ══ MULTI-USER SWITCHER ══════════════════════════════════ -->
+  <div class="user-switcher">
+    <div class="us-label">
+      <span>👥 MONITORED USERS</span>
+      <button onclick="window.openAddUserModal&&window.openAddUserModal()">+ Add</button>
+    </div>
+    <div id="userSlotList">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+  <!-- ════════════════════════════════════════════════════════ -->
+
+  <nav class="nav">
+    <div class="nlbl">Overview</div>
+    <a class="ni active" id="navDashboard"  href="#" onclick="navClick(this)"><span>📊</span> Dashboard</a>
+    <a class="ni"        id="navAppUsage"   href="#" onclick="openDeviceModal()"><span>📱</span> Device Status <span class="nb">Live</span></a>
+    <a class="ni"        id="navHistory"    href="#" onclick="openHistory();navClick(this)"><span>🌐</span> History</a>
+    <div class="nlbl">Analysis</div>
+    <a class="ni" id="navPredictions"  href="#" onclick="window.openPredictionsModal&&window.openPredictionsModal();navClick(this)"><span>🧠</span> Predictions</a>
+    <a class="ni" id="navRiskReport"   href="#" onclick="window.openRiskModal&&window.openRiskModal();navClick(this)"><span>⚠️</span> Risk Report</a>
+    <a class="ni" id="navGoals"        href="#" onclick="window.openGoalsModal&&window.openGoalsModal();navClick(this)"><span>🎯</span> Goals</a>
+    <a class="ni" id="navAIInsights"   href="#" onclick="window.openAIInsightsModal&&window.openAIInsightsModal();navClick(this)"><span>✨</span> AI Insights</a>
+    <a class="ni" id="navDeepAnalysis" href="#" onclick="window.openDeepAnalysisModal&&window.openDeepAnalysisModal();navClick(this)"><span>🔬</span> Deep Analysis</a>
+    <div class="nlbl">Account</div>
+    <a class="ni" id="navSettings" href="#" onclick="window.openModal&&window.openModal('settingsModal');navClick(this)"><span>⚙️</span> Settings</a>
+  </nav>
+
+  <div class="sfooter">
+    <div class="umini">
+      <div class="uav" id="sbAv">?</div>
+      <div>
+        <div class="un" id="sbName">—</div>
+        <div class="ur" id="sbRole">Member</div>
+      </div>
+      <button class="so" onclick="doSignOut()" title="Sign out">↩</button>
+    </div>
+  </div>
+</aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main">
+    <div class="topbar">
+      <div class="tb-l">
+        <h2 style="margin-top:3.5px;">Dashboard <span class="range-badge" id="rangeBadge">Today</span></h2>
+        <p id="tbDate" style="margin-bottom:4px ;">// Loading…</p>
+        
+      </div>
+      <div class="tb-r">
+        <div class="tr">
+          <button class="trb active" onclick="setRange(this,'today')">Today</button>
+          <button class="trb"        onclick="setRange(this,'week')">Week</button>
+          <button class="trb"        onclick="setRange(this,'month')">Month</button>
+        </div>
+        <div class="nb2" title="Notifications" onclick="window.openModal&&window.openModal('notifModal')">
+          🔔<div class="nd" id="notifDot"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- Range loading spinner -->
+      <div class="range-loading" id="rangeLoading">
+        <div class="spinner"></div>
+        <span>Loading data…</span>
+      </div>
+
+      <!-- No data banner -->
+      <div class="no-data" id="noDataBanner">
+        <div class="no-data-icon">📭</div>
+        <h3>No Data Yet</h3>
+        <p>Connect your phone and run an analysis to see your usage data here.</p>
+        <a href="../index.html">← Go to Home to Start Analysis</a>
+      </div>
+
+      <!-- Sync bar -->
+      <div class="sync-bar" id="syncBar">
+        <span>✅ Data synced — <span id="syncTime">just now</span></span>
+        <button class="sync-btn" onclick="loadData()">↺ Refresh</button>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="sg" id="statGrid">
+        <div class="sc c1">
+          <div class="si">⏱️</div>
+          <div class="slb">Total Screen Time</div>
+          <div class="sv" id="stTotal">—</div>
+          <div class="ss" id="stTotalSub">Loading…</div>
+        </div>
+        <div class="sc c2">
+          <div class="si">📱</div>
+          <div class="slb" id="stTopLabel">Most Used App</div>
+          <div class="sv" id="stTop">—</div>
+          <div class="ss" id="stTopSub">—</div>
+        </div>
+        <div class="sc c3">
+          <div class="si">🌐</div>
+          <div class="slb" id="stHistoryLabel">Browsing History</div>
+          <div class="sv" id="stHistoryCount">—</div>
+          <div class="ss" id="stHistorySub">—</div>
+        </div>
+        <div class="sc c4">
+          <div class="si">🧠</div>
+          <div class="slb">Addiction Risk</div>
+          <div class="sv" id="stRisk">—</div>
+          <div class="ss" id="stRiskSub">ML score: —</div>
+        </div>
+      </div>
+
+      <!-- LINE + DOUGHNUT (today only) -->
+      <div class="cr" id="todayCharts">
+        <div class="cc">
+          <div class="ch">
+            <div>
+              <div class="ct">Hourly Screen Time</div>
+              <div class="cs">// minutes per hour — today</div>
+            </div>
+            <span class="ctag">Live</span>
+          </div>
+          <canvas id="lineC" height="175"></canvas>
+        </div>
+        <div class="cc">
+          <div class="ch">
+            <div>
+              <div class="ct">App Breakdown</div>
+              <div class="cs">// share of screen time</div>
+            </div>
+          </div>
+          <canvas id="doughC" height="180"></canvas>
+          <div id="dLeg"></div>
+        </div>
+      </div>
+
+      <!-- APP TABLE + GAUGE (today only) -->
+      <div class="br" id="todayDetail">
+        <div class="cc">
+          <div class="ch">
+            <div>
+              <div class="ct">App-wise Usage</div>
+              <div class="cs" id="appTableSub">// session breakdown & alerts</div>
+            </div>
+          </div>
+          <table class="at">
+            <thead>
+              <tr>
+                <th>App</th>
+                <th>Time</th>
+                <th>Usage</th>
+                <th>Alert</th>
+              </tr>
+            </thead>
+            <tbody id="atBody"></tbody>
+          </table>
+        </div>
+        <div class="cc">
+          <div class="ch">
+            <div>
+              <div class="ct">Addiction Risk Score</div>
+              <div class="cs">// ML-based detection</div>
+            </div>
+          </div>
+          <div class="gw">
+            <canvas id="gaugeC" class="gc" width="180" height="100"></canvas>
+            <div class="gl" id="gLabel">—</div>
+            <div class="gsub" id="gSub">/ 100 — LOADING</div>
+          </div>
+          <div class="rfs" id="rfs"></div>
+        </div>
+      </div>
+
+      <!-- BAR CHART (shows weekly for week/month, forecast for today) -->
+      <div class="br">
+        <div class="cc">
+          <div class="ch">
+            <div>
+              <div class="ct" id="barTitle">Weekly Usage</div>
+              <div class="cs" id="barSub">// daily totals (hours)</div>
+            </div>
+          </div>
+          <canvas id="barC" height="175"></canvas>
+        </div>
+        <div class="pc">
+          <div class="ch">
+            <div>
+              <div class="ct">7-Day Forecast</div>
+              <div class="cs">// ML predicted usage</div>
+            </div>
+            <span class="ctag-green">Model Active</span>
+          </div>
+          <div id="predRows"></div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </main>
+</div><!-- /shell -->
+<!-- ══ ADD USER MODAL ══════════════════════════════════════════ -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal" style="max-width:420px;width:90vw">
+    <div class="modal-head">
+      <div class="modal-title">👥 Add Monitored User</div>
+      <button class="modal-close" onclick="closeModal('addUserModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;padding-top:4px">
+      <div style="font-size:11px;color:var(--text2);line-height:1.6;background:rgba(108,99,255,.07);border:1px solid rgba(108,99,255,.2);border-radius:8px;padding:10px 12px">
+        Sign in with a different Google account to monitor up to <strong style="color:#a78bfa">3 users</strong> from this dashboard. Each user's data is stored separately in Firestore.
+      </div>
+
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:.08em">👤 CURRENT MONITORED USERS</div>
+      <div id="addUserCurrentList" style="display:flex;flex-direction:column;gap:6px"></div>
+
+      <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:10px">
+        <button onclick="addNewMonitoredUser()" id="addUserBtn" style="
+          width:100%;background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.35);
+          color:#a78bfa;border-radius:8px;padding:10px;font-size:12px;font-weight:700;
+          cursor:pointer;font-family:inherit;letter-spacing:.05em">
+          ＋ Sign in with Another Google Account
+        </button>
+      </div>
+      <div id="addUserStatus" style="font-size:11px;text-align:center;display:none"></div>
+    </div>
+  </div>
+</div>
+ <footer style="text-align: center; padding: 15px; background-color: rgba(245, 245, 245, 0); border-top: 1px solid rgba(46, 204, 113, 0.3); font-family: 'Segoe UI', Arial, sans-serif; color: #ffffff; font-size: 14px; line-height: 1.6; letter-spacing: 0.3px;">
+    <p style="margin: 5px 0; font-weight: 500;">Copyright © 2026 Department of Artificial Intelligence and Data Science, SRM Valliammai Engineering College</p>
+    <p style="margin: 5px 0; color: #ffffff; font-weight: 500;">
+        RAJESH P - 142222243037 | 
+        SANTHOSH M - 142222243040 | 
+        SUDHARSAN G - 142222243047 | 
+        SUMAN T - 142222243048
+    </p>
+</footer>
+
+<!-- ══════════════════════════════════════
+     FIREBASE + DASHBOARD JS
+════════════════════════════════════════ -->
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+import{getAuth,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+import{getFirestore,doc,getDoc}from'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+
+const cfg={
+  apiKey: "AIzaSyCP0qBf4blmazVpaIygXG5w-E9l6sY2N1Y",
+  authDomain: "screensense-ai-f8fd9.firebaseapp.com",
+  projectId: "screensense-ai-f8fd9",
+  storageBucket: "screensense-ai-f8fd9.firebasestorage.app",
+  messagingSenderId: "788961774235",
+  appId: "1:788961774235:web:31156f26fc26d92bbd543e",
+  measurementId: "G-ER1T1Q5NZ9"
+};
+const APP=initializeApp(cfg),auth=getAuth(APP),fbdb=getFirestore(APP);
+const F = `${window.location.protocol}//${window.location.hostname}:5000`;
+
+let currentUser=null;
+let lineChart=null,doughChart=null,gaugeChart=null,barChart=null;
+let currentRange='today';
+let dataCache={today:null,week:null,month:null};
+let autoRefreshTimer=null;
+let settings={autoRefresh:true,riskThreshold:70,screenLimit:6};
+let currentDeviceSerial=null;
+let lastDisplayedDevice=null;
+
+Chart.defaults.color='#7070a0';
+Chart.defaults.font.family="'Space Mono',monospace";
+Chart.defaults.font.size=10;
+const GC='rgba(108,99,255,.08)';
+
+function cleanAppName(packageName){
+  if(!packageName)return'Unknown';
+  const parts=packageName.split('.');
+  let last=parts[parts.length-1];
+  last=last.replace(/_/g,' ');
+  last=last.replace(/([a-z])([A-Z])/g,'$1 $2');
+  return last.trim().charAt(0).toUpperCase()+last.trim().slice(1);
+}
+
+// ── Expose globals ────────────────────────────────────────────────
+window.doSignOut       = async()=>{await signOut(auth);window.location.href='../index.html'};
+window.loadData        = ()=>currentUser&&fetchAndRender(getActiveUID()||currentUser.uid,currentRange,true);
+window.openModal = (id) => {
+  document.getElementById(id).classList.add('open');
+  if (id === 'settingsModal' && currentUser) {
+    document.getElementById('gmailDisplayName').textContent =
+      currentUser.displayName || currentUser.email?.split('@')[0] || 'Unknown';
+    document.getElementById('gmailDisplayEmail').textContent =
+      currentUser.email || '—';
+  }
+};
+window.closeModal      = (id)=>document.getElementById(id).classList.remove('open');
+window.navClick        = (el)=>{document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));el.classList.add('active')};
+window.toggleSetting   = (btn,key)=>{btn.classList.toggle('on');settings[key]=btn.classList.contains('on');applySettings()};
+window.saveSetting     = (key,val)=>{settings[key]=+val;applySettings()};
+
+// ══════════════════════════════════════════════════════════════════
+// AI INSIGHTS MODAL  ← NEW STANDALONE FUNCTION
+// ══════════════════════════════════════════════════════════════════
+window.openAIInsightsModal = async () => {
+  openModal('aiInsightsModal');
+  await loadAIInsightsModal(false);
+};
+
+window.loadAIInsightsModal = async (forceRefresh = false) => {
+  if (!currentUser) return;
+  const body     = document.getElementById('aiInsightsBody');
+  const refreshBtn = document.getElementById('aiInsRefreshBtn');
+
+  body.innerHTML = `
+    <div style="color:var(--text2);font-size:12px;text-align:center;padding:24px">
+      <div style="font-size:28px;margin-bottom:8px">🧠</div>
+      Generating AI insights from your usage data…
+    </div>`;
+  if (refreshBtn) { refreshBtn.textContent = '⏳'; refreshBtn.disabled = true; }
+
+  try {
+    const url  = `${F}/api/ai_insights/${currentUser.uid}${forceRefresh ? '?fresh=1' : ''}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if (!data.insights || !data.insights.length) throw new Error('empty');
+
+    // ── Insight Cards ──────────────────────────────────────────
+    const cardsHTML = data.insights.slice(0, 3).map(i => `
+      <div style="
+        background:rgba(255,255,255,.03);
+        border:1px solid rgba(255,255,255,.08);
+        border-left:3px solid ${i.severity==='high'?'#ff4f6d':i.severity==='medium'?'#ffb347':'#00e5a0'};
+        border-radius:10px;padding:12px 14px
+      ">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:18px">${i.icon || '🧠'}</span>
+          <span style="font-size:12px;font-weight:700;color:var(--text1);flex:1">${i.title}</span>
+          <span style="
+            font-size:9px;padding:2px 7px;border-radius:4px;font-weight:700;letter-spacing:.06em;
+            background:${i.severity==='high'?'rgba(255,79,109,.15)':i.severity==='medium'?'rgba(255,179,71,.15)':'rgba(0,229,160,.12)'};
+            color:${i.severity==='high'?'#ff4f6d':i.severity==='medium'?'#ffb347':'#00e5a0'}
+          ">${(i.severity||'low').toUpperCase()}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.65;margin-bottom:8px">${i.body}</div>
+        ${i.category?`<div style="font-size:9px;color:#6c63ff;margin-bottom:6px;letter-spacing:.05em">📂 ${i.category.replace(/_/g,' ').toUpperCase()}</div>`:''}
+        <div style="font-size:10px;color:#a78bfa;opacity:.85;cursor:pointer" onclick="window.openRiskModal&&window.openRiskModal()">${i.action || 'View details →'}</div>
+      </div>`).join('');
+
+    // ── ML Factor mini-bars ────────────────────────────────────
+    let mlHTML = '';
+    if (data.ml_factors) {
+      const f = data.ml_factors;
+      const defs = [
+        {key:'screen_time',   label:'Screen Time',      color:'#ff4f6d'},
+        {key:'social_media',  label:'Social Media',     color:'#ff6b9d'},
+        {key:'unlocks',       label:'Phone Unlocks',    color:'#ffb347'},
+        {key:'night_usage',   label:'Night Usage',      color:'#6c63ff'},
+        {key:'concentration', label:'App Concentration',color:'#00d4ff'},
+      ];
+      mlHTML = `
+        <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:12px">
+          <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:10px;letter-spacing:.08em">🔬 ML RISK FACTORS</div>
+          ${defs.map(d=>`
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <div style="width:110px;font-size:10px;color:var(--text2)">${d.label}</div>
+              <div style="flex:1;background:rgba(255,255,255,.05);border-radius:3px;height:6px;overflow:hidden">
+                <div style="width:${f[d.key]||0}%;height:100%;background:${d.color};border-radius:3px;transition:width .4s"></div>
+              </div>
+              <div style="width:28px;text-align:right;font-size:10px;font-weight:700;color:${d.color}">${f[d.key]||0}</div>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    // ── Overall score banner — always use live dashboard data ─────
+    const score = dataCache.today?.riskScore ?? (data.ml_score || 0);
+    const level = dataCache.today?.riskLevel ?? (data.ml_level || 'low');
+    const bannerColor = level==='high'?'#ff4f6d':level==='moderate'?'#ffb347':'#00e5a0';
+    const bannerHTML = `
+      <div style="
+        background:${bannerColor}12;
+        border:1px solid ${bannerColor}30;
+        border-radius:10px;padding:12px 16px;
+        display:flex;align-items:center;gap:14px
+      ">
+        <div style="font-size:30px;font-weight:800;color:${bannerColor}">${score}</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text1)">Overall Risk Score</div>
+          <div style="font-size:11px;color:${bannerColor};margin-top:2px;font-weight:700">${capitalize(level)} Risk · ${score}/100</div>
+        </div>
+      </div>`;
+
+    body.innerHTML = bannerHTML + cardsHTML + mlHTML;
+
+  } catch(e) {
+    // Fallback using cached data
+    const st = dataCache.today || {};
+    const ins = [];
+    if ((st.totalScreenTimeHr||0) > settings.screenLimit)
+      ins.push({ico:'⚠️',t:'Excessive Screen Time',b:`${(st.totalScreenTimeHr||0).toFixed(1)}h today — ${((st.totalScreenTimeHr||0)-settings.screenLimit).toFixed(1)}h over your limit.`,sev:'high'});
+    if ((st.socialMediaPct||0) > 40)
+      ins.push({ico:'📱',t:'Social Media Overuse',b:`${(st.socialMediaPct||0).toFixed(0)}% of screen time on social apps.`,sev:'medium'});
+    if ((st.riskScore||0) > settings.riskThreshold)
+      ins.push({ico:'🧠',t:'High Risk Detected',b:`ML model scored your usage ${st.riskScore||0}/100.`,sev:'high'});
+    if (!ins.length)
+      ins.push({ico:'✅',t:'Usage Looks Healthy',b:'Your screen time patterns are within normal range. Keep it up!',sev:'low'});
+    body.innerHTML = ins.map(i=>`
+      <div style="
+        background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+        border-left:3px solid ${i.sev==='high'?'#ff4f6d':i.sev==='medium'?'#ffb347':'#00e5a0'};
+        border-radius:10px;padding:12px 14px
+      ">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:18px">${i.ico}</span>
+          <span style="font-size:12px;font-weight:700;color:var(--text1)">${i.t}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6">${i.b}</div>
+      </div>`).join('');
+  } finally {
+    if (refreshBtn) { refreshBtn.textContent = '↺ Refresh'; refreshBtn.disabled = false; }
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════
+// ML PREDICTIONS MODAL — Streamlined 5-section version
+// ══════════════════════════════════════════════════════════════════
+window.openPredictionsModal = async () => {
+  openModal('predictionsModal');
+  const body = document.getElementById('predictionsBody');
+
+  body.innerHTML = `
+    <div style="color:var(--text2);font-size:12px;text-align:center;padding:20px">
+      <div style="font-size:28px;margin-bottom:8px">⏳</div>
+      Loading predictions…
+    </div>`;
+
+  const st = dataCache.today || {};
+
+  // ── Fetch forecast if missing ─────────────────────────────────
+  let forecast = st.forecast || [];
+  if (!forecast.length && currentUser) {
+    try {
+      const r = await fetch(`${F}/api/user/${currentUser.uid}`, {signal: AbortSignal.timeout(4000)});
+      if (r.ok) {
+        const d = await r.json();
+        forecast = d.screenTimeData?.forecast || [];
+        if (forecast.length && dataCache.today) dataCache.today.forecast = forecast;
+      }
+    } catch(e) {}
+  }
+  if (!forecast.length && (st.totalScreenTimeHr || 0) > 0) {
+    forecast = generateForecastClient(st.totalScreenTimeHr, st.riskScore || 50);
+  }
+
+  // ── Fetch ML factors ──────────────────────────────────────────
+  let mlFactors = null;
+  try {
+    const res  = await fetch(`${F}/api/ai_insights/${currentUser.uid}`);
+    const data = await res.json();
+    mlFactors  = data.ml_factors;
+  } catch(e) {}
+
+  // ── Helper values ─────────────────────────────────────────────
+  const todayLabel = new Date().toLocaleDateString('en-GB',{weekday:'short'});
+  const tomorrowIdx = (new Date().getDay() + 1) % 7;
+  const dayNames   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const tomorrowForecast = forecast.find(f => f.day === dayNames[tomorrowIdx]);
+
+  // ── Most likely app tomorrow ──────────────────────────────────
+  const apps = st.appUsage || [];
+  const topApp = apps.length
+    ? [...apps].sort((a,b)=>(b.minutes||0)-(a.minutes||0))[0]
+    : null;
+
+  // ── Peak hour ─────────────────────────────────────────────────
+  const hourly = st.hourlyDistribution || {};
+  const hourEntries = Object.entries(hourly);
+  const peakEntry = hourEntries.length
+    ? hourEntries.reduce((a,b) => +a[1] > +b[1] ? a : b)
+    : null;
+  const peakHourLabel = peakEntry
+    ? (() => {
+        const h = +peakEntry[0];
+        const suffix = h >= 12 ? 'PM' : 'AM';
+        const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
+        return `${h12}:00 ${suffix}`;
+      })()
+    : '—';
+
+  // ── Usage trend ───────────────────────────────────────────────
+  let trendLabel = '—', trendColor = '#a78bfa', trendIcon = '📈';
+  if (forecast.length >= 3) {
+    const todayH  = forecast.find(f => f.day === todayLabel)?.predicted_hr || st.totalScreenTimeHr || 0;
+    const avgRest = forecast.filter(f => f.day !== todayLabel)
+                            .reduce((s,f,_,arr) => s + (f.predicted_hr||0)/arr.length, 0);
+    const diff = todayH - avgRest;
+    if (diff > 0.5)      { trendLabel = 'Increasing ↑'; trendColor = '#ff4f6d'; trendIcon = '📈'; }
+    else if (diff < -0.5){ trendLabel = 'Decreasing ↓'; trendColor = '#00e5a0'; trendIcon = '📉'; }
+    else                 { trendLabel = 'Stable →';     trendColor = '#ffb347'; trendIcon = '➡️'; }
+  }
+
+  // ════════════════════════════════════════
+  // SECTION 1 — 🧠 ML Predictions (risk banner)
+  // ════════════════════════════════════════
+  const riskScore = st.riskScore || 0;
+  const riskLevel = st.riskLevel || 'low';
+  const riskCol   = riskLevel==='high'?'#ff4f6d':riskLevel==='moderate'?'#ffb347':'#00e5a0';
+  const riskMsg   = riskLevel==='high'   ? 'Immediate action recommended — usage is at critical levels.'
+                  : riskLevel==='moderate'? 'Elevated usage detected — monitor closely and reduce screen time.'
+                  : 'Your usage patterns are within a healthy range. Keep it up!';
+
+  const s1 = `
+    <div>
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:10px;letter-spacing:.08em">🧠 ML PREDICTIONS</div>
+      <div style="
+        background:${riskCol}12;border:1px solid ${riskCol}35;
+        border-radius:12px;padding:14px 16px;
+        display:flex;align-items:center;gap:14px
+      ">
+        <div style="
+          width:56px;height:56px;border-radius:50%;
+          background:${riskCol}20;border:2px solid ${riskCol}50;
+          display:flex;align-items:center;justify-content:center;
+          font-size:20px;font-weight:800;color:${riskCol};flex-shrink:0
+        ">${riskScore}</div>
+        <div>
+          <div style="font-size:13px;font-weight:700;color:var(--text1)">${capitalize(riskLevel)} Risk</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:3px;line-height:1.5">${riskMsg}</div>
+        </div>
+      </div>
+      ${mlFactors ? `
+        <div style="margin-top:10px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px">
+          ${[
+            {k:'screen_time',   ico:'⏱️', label:'Screen',  color:'#ff4f6d'},
+            {k:'social_media',  ico:'📱', label:'Social',  color:'#ff6b9d'},
+            {k:'unlocks',       ico:'🔓', label:'Unlocks', color:'#ffb347'},
+            {k:'night_usage',   ico:'🌙', label:'Night',   color:'#6c63ff'},
+            {k:'concentration', ico:'🎯', label:'Focus',   color:'#00d4ff'},
+          ].map(d => `
+            <div style="
+              background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+              border-radius:8px;padding:8px 4px;text-align:center
+            ">
+              <div style="font-size:16px;margin-bottom:3px">${d.ico}</div>
+              <div style="font-size:12px;font-weight:700;color:${d.color}">${mlFactors[d.k]||0}</div>
+              <div style="font-size:9px;color:var(--text2);margin-top:1px">${d.label}</div>
+            </div>`).join('')}
+        </div>` : ''}
+    </div>`;
+
+  // ════════════════════════════════════════
+  // SECTION 2 — 🔮 Tomorrow Screen Time
+  // ════════════════════════════════════════
+  const th = tomorrowForecast?.predicted_hr || 0;
+  const tColor = th > 6 ? '#ff4f6d' : th > 4 ? '#ffb347' : '#00e5a0';
+  const tMsg   = th > 6 ? 'High usage predicted — plan offline activities'
+               : th > 4 ? 'Moderate usage expected — stay mindful'
+               : th > 0 ? 'Low usage predicted — great day ahead!'
+               : 'No forecast available for tomorrow';
+
+  const s2 = `
+    <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px">
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:10px;letter-spacing:.08em">🔮 TOMORROW'S SCREEN TIME</div>
+      <div style="
+        background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+        border-radius:12px;padding:14px 16px;
+        display:flex;align-items:center;gap:14px
+      ">
+        <div style="font-size:32px;font-weight:800;color:${tColor};min-width:52px">${th > 0 ? th+'h' : '—'}</div>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--text1)">Predicted for ${dayNames[tomorrowIdx]}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:3px;line-height:1.5">${tMsg}</div>
+        </div>
+        <div style="
+          margin-left:auto;font-size:9px;padding:3px 8px;border-radius:5px;font-weight:700;
+          background:${tColor}18;color:${tColor};white-space:nowrap
+        ">${th > 6 ? 'HIGH' : th > 4 ? 'MODERATE' : 'LOW'}</div>
+      </div>
+    </div>`;
+
+  // ════════════════════════════════════════
+  // SECTION 3 — 📱 Most Likely App Tomorrow
+  // ════════════════════════════════════════
+  const appName  = topApp ? (topApp.clean_name || cleanAppName(topApp.app_name || topApp.appName || 'Unknown')) : '—';
+  const appMins  = topApp ? Math.round(topApp.minutes || topApp.total_time_min || 0) : 0;
+  const appIcon  = topApp ? getAppIcon(topApp.app_name || topApp.appName || '') : '📱';
+  const appColor = topApp ? getAppColor(topApp.app_name || topApp.appName || '') : 'rgba(108,99,255,.12)';
+  const appRisk  = topApp?.risk_level || topApp?.riskLevel || 'low';
+  const appRiskColor = appRisk==='high'?'#ff4f6d':appRisk==='medium'||appRisk==='moderate'?'#ffb347':'#00e5a0';
+
+  const s3 = `
+    <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px">
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:10px;letter-spacing:.08em">📱 MOST LIKELY APP TOMORROW</div>
+      <div style="
+        background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+        border-radius:12px;padding:14px 16px;
+        display:flex;align-items:center;gap:14px
+      ">
+        <div style="
+          width:44px;height:44px;border-radius:10px;flex-shrink:0;
+          background:${appColor};display:flex;align-items:center;justify-content:center;font-size:22px
+        ">${appIcon}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:var(--text1)">${appName}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">
+            Based on today's usage · ${appMins > 0 ? appMins + ' min today' : 'No data yet'}
+          </div>
+        </div>
+        ${topApp ? `<div style="
+          font-size:9px;padding:3px 8px;border-radius:5px;font-weight:700;
+          background:${appRiskColor}18;color:${appRiskColor};white-space:nowrap
+        ">${appRisk.toUpperCase()} RISK</div>` : ''}
+      </div>
+    </div>`;
+
+  // ════════════════════════════════════════
+  // SECTION 4 — ⏰ Peak Usage Hour
+  // ════════════════════════════════════════
+  const peakMins = peakEntry ? Math.round(+peakEntry[1]) : 0;
+  const peakColor = peakMins > 45 ? '#ff4f6d' : peakMins > 20 ? '#ffb347' : '#6c63ff';
+  // Build mini sparkline data (top 5 hours)
+  const top5Hours = hourEntries.length
+    ? [...hourEntries].sort((a,b) => +b[1] - +a[1]).slice(0, 5)
+    : [];
+  const maxPeakMins = top5Hours.length ? +top5Hours[0][1] : 1;
+
+  const s4 = `
+    <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px">
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:10px;letter-spacing:.08em">⏰ PEAK USAGE HOUR</div>
+      <div style="
+        background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+        border-radius:12px;padding:14px 16px
+      ">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+          <div style="font-size:24px;font-weight:800;color:${peakColor};min-width:72px">${peakHourLabel}</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text1)">${peakMins} min at peak</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">Highest single-hour usage today</div>
+          </div>
+        </div>
+        ${top5Hours.length ? `
+          <div style="font-size:10px;color:var(--text2);margin-bottom:6px">Top activity windows:</div>
+          ${top5Hours.map(([h, m]) => {
+            const hNum = +h;
+            const suffix = hNum >= 12 ? 'PM' : 'AM';
+            const h12 = hNum === 0 ? 12 : hNum > 12 ? hNum - 12 : hNum;
+            const pct = ((+m / maxPeakMins) * 100).toFixed(0);
+            return `
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
+                <div style="width:52px;font-size:10px;color:var(--text2)">${h12}:00 ${suffix}</div>
+                <div style="flex:1;background:rgba(255,255,255,.05);border-radius:3px;height:5px;overflow:hidden">
+                  <div style="width:${pct}%;height:100%;background:${peakColor};border-radius:3px;transition:width .4s"></div>
+                </div>
+                <div style="width:36px;text-align:right;font-size:10px;font-weight:700;color:${peakColor}">${Math.round(+m)}m</div>
+              </div>`;
+          }).join('')}` : '<div style="color:var(--text2);font-size:11px">No hourly data available.</div>'}
+      </div>
+    </div>`;
+
+  // ════════════════════════════════════════
+  // SECTION 5 — 📈 Usage Trend (7-day sparkline)
+  // ════════════════════════════════════════
+  const maxForecastH = forecast.length ? Math.max(...forecast.map(f => f.predicted_hr || 0), 1) : 1;
+  const s5 = `
+    <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px">
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:10px;letter-spacing:.08em">📈 USAGE TREND — 7 DAYS</div>
+      <div style="
+        background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+        border-radius:12px;padding:14px 16px
+      ">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+          <span style="font-size:22px">${trendIcon}</span>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:${trendColor}">${trendLabel}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px">Compared to weekly average</div>
+          </div>
+        </div>
+        ${forecast.length ? `
+          <div style="display:flex;align-items:flex-end;gap:4px;height:50px;margin-bottom:6px">
+            ${forecast.slice(0,7).map(f => {
+              const h = f.predicted_hr || 0;
+              const isToday = f.day === todayLabel;
+              const barH = Math.max((h / maxForecastH) * 46, 3);
+              const bColor = h > 6 ? '#ff4f6d' : h > 4 ? '#ffb347' : '#6c63ff';
+              return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px">
+                <div style="
+                  width:100%;height:${barH}px;
+                  background:${isToday ? bColor : bColor+'55'};
+                  border-radius:3px 3px 0 0;
+                  ${isToday ? `box-shadow:0 0 8px ${bColor}50;` : ''}
+                  transition:height .4s
+                "></div>
+              </div>`;
+            }).join('')}
+          </div>
+          <div style="display:flex;gap:4px">
+            ${forecast.slice(0,7).map(f => `
+              <div style="flex:1;text-align:center;font-size:9px;color:${f.day===todayLabel?'#a78bfa':'var(--text2)'};
+                font-weight:${f.day===todayLabel?'700':'400'}">
+                ${f.day}
+              </div>`).join('')}
+          </div>
+          <div style="display:flex;gap:4px;margin-top:2px">
+            ${forecast.slice(0,7).map(f => `
+              <div style="flex:1;text-align:center;font-size:9px;color:var(--text2)">
+                ${f.predicted_hr||0}h
+              </div>`).join('')}
+          </div>` : '<div style="color:var(--text2);font-size:11px">No trend data available yet.</div>'}
+      </div>
+    </div>`;
+
+  body.innerHTML = s1 + s2 + s3 + s4 + s5;
+};
+
+// ── BROWSING HISTORY ──────────────────────────────────────────────
+window.openHistory = async () => {
+  if (!currentUser) return;
+  openModal('historyModal');
+
+  const body = document.getElementById('historyBody');
+  body.innerHTML = '<div style="color:var(--text2);padding:20px;text-align:center">Loading browsing history…</div>';
+
+  try {
+    const res  = await fetch(`${F}/api/history/${currentUser.uid}`);
+    const data = await res.json();
+
+    const hasData = data.recent?.length || data.most?.length || data.history_30d?.length;
+    if (!hasData) {
+      body.innerHTML = '<div style="color:var(--text2)">No browsing history available.</div>';
+      return;
+    }
+
+    let html = '';
+
+    html += `
+      <div style="display:flex;gap:6px;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,.07);padding-bottom:8px;flex-wrap:wrap">
+        <button onclick="showHistTab('insights')" id="htab-insights" style="
+          background:rgba(108,99,255,.2);border:1px solid rgba(108,99,255,.4);
+          color:#a78bfa;border-radius:6px;padding:4px 10px;font-size:11px;
+          cursor:pointer;font-family:inherit">🧠 AI Insights</button>
+        <button onclick="showHistTab('recent')" id="htab-recent" style="
+          background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+          color:var(--text2);border-radius:6px;padding:4px 10px;font-size:11px;
+          cursor:pointer;font-family:inherit">🕒 Recent</button>
+        <button onclick="showHistTab('most')" id="htab-most" style="
+          background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+          color:var(--text2);border-radius:6px;padding:4px 10px;font-size:11px;
+          cursor:pointer;font-family:inherit">📈 Most Visited</button>
+        <button onclick="showHistTab('30d')" id="htab-30d" style="
+          background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+          color:var(--text2);border-radius:6px;padding:4px 10px;font-size:11px;
+          cursor:pointer;font-family:inherit">📅 30-Day History</button>
+        <span style="margin-left:auto;font-size:10px;color:var(--text2);align-self:center">
+          ${data.total_visits || 0} total visits
+        </span>
+      </div>`;
+
+    html += `
+      <div id="hist-panel-insights">
+        <div id="hist-insights-inner" style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:10px;color:#a78bfa;font-weight:700;letter-spacing:.08em">🧠 AI BROWSING ANALYSIS</div>
+            <button onclick="loadHistoryInsights(true)" id="histInsRefreshBtn" style="
+              background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);
+              color:#a78bfa;border-radius:6px;padding:3px 10px;font-size:10px;
+              cursor:pointer;font-family:inherit;letter-spacing:.05em">↺ Refresh</button>
+          </div>
+          <div id="hist-insights-cards" style="display:flex;flex-direction:column;gap:8px">
+            <div style="color:var(--text2);font-size:12px;text-align:center;padding:20px">
+              <div style="font-size:24px;margin-bottom:8px">⏳</div>
+              Generating AI insights from your browsing history…
+            </div>
+          </div>
+          <div id="hist-insights-stats" style="display:none"></div>
+          <div id="hist-insights-domains" style="display:none"></div>
+        </div>
+      </div>`;
+
+    html += `<div id="hist-panel-recent" style="display:none">`;
+    if (data.recent?.length) {
+      data.recent.forEach(item => {
+        html += histItem(item.url, new Date(item.lastVisited).toLocaleString());
+      });
+    } else {
+      html += `<div style="color:var(--text2);font-size:11px">No recent visits.</div>`;
+    }
+    html += `</div>`;
+
+    html += `<div id="hist-panel-most" style="display:none">`;
+    if (data.most?.length) {
+      data.most.forEach(item => {
+        html += histItem(item.url, `${item.count} visit${item.count !== 1 ? 's' : ''}`);
+      });
+    } else {
+      html += `<div style="color:var(--text2);font-size:11px">No data.</div>`;
+    }
+    html += `</div>`;
+
+    html += `<div id="hist-panel-30d" style="display:none">`;
+    if (data.history_30d?.length) {
+      data.history_30d.forEach(day => {
+        const isToday = day.date === new Date().toISOString().slice(0,10);
+        const label = isToday
+          ? 'Today'
+          : new Date(day.date + 'T00:00:00').toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' });
+        html += `
+          <div style="margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;
+              padding:5px 0;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:4px">
+              <span style="font-size:11px;font-weight:700;color:#a78bfa">${label}</span>
+              <span style="font-size:10px;color:var(--text2)">${day.unique} unique · ${day.total} total</span>
+            </div>`;
+        day.visits.forEach(v => {
+          const t = v.timestamp
+            ? new Date(v.timestamp).toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' })
+            : '';
+          html += histItem(v.url, t);
+        });
+        html += `</div>`;
+      });
+    } else {
+      html += `<div style="color:var(--text2);font-size:11px">No 30-day history available.</div>`;
+    }
+    html += `</div>`;
+
+    body.innerHTML = html;
+    loadHistoryInsights(false);
+
+  } catch (err) {
+    console.error(err);
+    body.innerHTML = '<div style="color:var(--red)">Failed to load history.</div>';
+  }
+};
+
+window.loadHistoryInsights = async (forceRefresh = false) => {
+  if (!currentUser) return;
+  const cardsEl   = document.getElementById('hist-insights-cards');
+  const statsEl   = document.getElementById('hist-insights-stats');
+  const domainsEl = document.getElementById('hist-insights-domains');
+  const refreshBtn= document.getElementById('histInsRefreshBtn');
+  if (!cardsEl) return;
+
+  cardsEl.innerHTML = `
+    <div style="color:var(--text2);font-size:12px;text-align:center;padding:20px">
+      <div style="font-size:24px;margin-bottom:8px">🧠</div>
+      Analyzing your browsing patterns with AI…
+    </div>`;
+  if (refreshBtn) { refreshBtn.textContent = '⏳'; refreshBtn.disabled = true; }
+
+  try {
+    const url  = `${F}/api/history_insights/${currentUser.uid}${forceRefresh ? '?fresh=1' : ''}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if (!data.insights || !data.insights.length) throw new Error('No insights returned');
+
+    cardsEl.innerHTML = data.insights.slice(0, 3).map(i => `
+      <div style="
+        background:rgba(255,255,255,.03);
+        border:1px solid rgba(255,255,255,.08);
+        border-left:3px solid ${i.severity === 'high' ? '#ff4f6d' : i.severity === 'medium' ? '#ffb347' : '#00e5a0'};
+        border-radius:10px;padding:12px 14px
+      ">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <span style="font-size:18px">${i.icon || '🌐'}</span>
+          <span style="font-size:12px;font-weight:700;color:var(--text1);flex:1">${i.title}</span>
+          <span style="
+            font-size:9px;padding:2px 7px;border-radius:4px;font-weight:700;letter-spacing:.06em;
+            background:${i.severity==='high'?'rgba(255,79,109,.15)':i.severity==='medium'?'rgba(255,179,71,.15)':'rgba(0,229,160,.12)'};
+            color:${i.severity==='high'?'#ff4f6d':i.severity==='medium'?'#ffb347':'#00e5a0'}
+          ">${(i.severity || 'low').toUpperCase()}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:8px">${i.body}</div>
+        ${i.category ? `<div style="font-size:9px;color:#6c63ff;margin-bottom:6px;letter-spacing:.05em">📂 ${i.category.replace(/_/g,' ').toUpperCase()}</div>` : ''}
+        <div style="font-size:10px;color:#a78bfa;cursor:pointer;opacity:.8">${i.action || 'View details →'}</div>
+      </div>`).join('');
+
+    if (statsEl && data.total_visits) {
+      statsEl.style.display = 'grid';
+      statsEl.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      statsEl.style.gap = '8px';
+      statsEl.style.marginTop = '12px';
+      statsEl.innerHTML = [
+        { ico: '🌐', label: 'Total Visits',   val: data.total_visits },
+        { ico: '🏠', label: 'Unique Domains', val: data.unique_domains },
+        { ico: '📅', label: "Today's Visits", val: data.today_count },
+        { ico: '📱', label: 'Social Media %', val: `${data.social_pct}%` },
+        { ico: '💼', label: 'Productive %',   val: `${data.productive_pct}%` },
+        { ico: '⚠️', label: 'Risk Level',     val: data.social_pct > 50 ? 'High' : data.social_pct > 30 ? 'Moderate' : 'Low' },
+      ].map(s => `
+        <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:16px;margin-bottom:4px">${s.ico}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text1)">${s.val}</div>
+          <div style="font-size:9px;color:var(--text2);margin-top:2px">${s.label}</div>
+        </div>`).join('');
+    }
+
+    if (domainsEl && data.top_domains?.length) {
+      domainsEl.style.display = 'block';
+      domainsEl.style.marginTop = '12px';
+      const maxCount = data.top_domains[0]?.[1] || 1;
+      domainsEl.innerHTML = `
+        <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:8px;letter-spacing:.08em">📊 TOP DOMAINS</div>
+        ${data.top_domains.slice(0, 7).map(([domain, count], idx) => {
+          const pct   = Math.round((count / maxCount) * 100);
+          const colors = ['#6c63ff','#ff6b9d','#00d4ff','#ffb347','#00e5a0','#ff4f6d','#a78bfa'];
+          const color  = colors[idx % colors.length];
+          return `
+            <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+              <div style="width:120px;font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${domain}">${domain}</div>
+              <div style="flex:1;background:rgba(255,255,255,.05);border-radius:3px;height:6px;overflow:hidden">
+                <div style="width:${pct}%;height:100%;background:${color};border-radius:3px;transition:width .5s"></div>
+              </div>
+              <div style="width:32px;text-align:right;font-size:10px;font-weight:700;color:${color}">${count}</div>
+            </div>`;
+        }).join('')}`;
+    }
+
+    if (domainsEl && data.category_breakdown) {
+      const catHtml = Object.entries(data.category_breakdown)
+        .sort((a, b) => b[1].count - a[1].count)
+        .slice(0, 6)
+        .map(([cat, info]) => {
+          const catColors = {
+            social_media: '#ff6b9d', productivity: '#00e5a0',
+            entertainment: '#ffb347', news: '#00d4ff',
+            shopping: '#a78bfa', education: '#6c63ff', adult_risk: '#ff4f6d',
+          };
+          const color = catColors[cat] || '#6c63ff';
+          return `<span style="background:${color}18;border:1px solid ${color}40;color:${color};border-radius:20px;padding:3px 10px;font-size:9px;font-weight:700;letter-spacing:.05em">${cat.replace(/_/g,' ').toUpperCase()} ${info.pct}%</span>`;
+        }).join('');
+      if (catHtml) {
+        domainsEl.innerHTML += `
+          <div style="margin-top:10px">
+            <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:8px;letter-spacing:.08em">🏷️ CATEGORIES</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">${catHtml}</div>
+          </div>`;
+      }
+    }
+  } catch (e) {
+    console.error('History insights error:', e);
+    cardsEl.innerHTML = `
+      <div style="color:var(--text2);font-size:11px;padding:12px;text-align:center">
+        <div style="font-size:20px;margin-bottom:6px">⚠️</div>
+        Could not load AI insights. Make sure the Flask server is running.
+        <br><br>
+        <button onclick="loadHistoryInsights(true)" style="
+          background:rgba(108,99,255,.15);border:1px solid rgba(108,99,255,.3);
+          color:#a78bfa;border-radius:6px;padding:4px 12px;font-size:10px;
+          cursor:pointer;font-family:inherit">↺ Try Again</button>
+      </div>`;
+  } finally {
+    if (refreshBtn) { refreshBtn.textContent = '↺ Refresh'; refreshBtn.disabled = false; }
+  }
+};
+
+window.showHistTab = (tab) => {
+  ['insights', 'recent', 'most', '30d'].forEach(t => {
+    const panel = document.getElementById(`hist-panel-${t}`);
+    const btn   = document.getElementById(`htab-${t}`);
+    if (!panel || !btn) return;
+    const active = t === tab;
+    panel.style.display = active ? 'block' : 'none';
+    btn.style.background  = active ? 'rgba(108,99,255,.2)'  : 'rgba(255,255,255,.04)';
+    btn.style.borderColor = active ? 'rgba(108,99,255,.4)'  : 'rgba(255,255,255,.08)';
+    btn.style.color       = active ? '#a78bfa'               : 'var(--text2)';
+  });
+};
+
+function histItem(url, meta) {
+  let display = url;
+  try {
+    display = new URL(url).hostname + new URL(url).pathname.slice(0, 30);
+  } catch(e) {}
+  return `<div style="padding:6px 0;margin-bottom:2px">
+    <a href="${url}" target="_blank" title="${url}" style="
+      font-size:12px;color:#a78bfa;text-decoration:none;display:block;
+      padding:3px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%
+    ">${display}</a>
+    <div style="font-size:10px;color:var(--text2);margin-top:1px">${meta}</div>
+    <hr style="border:none;border-top:1px solid rgba(255,255,255,.06);margin:5px 0 0 0"/>
+  </div>`;
+}
+
+window.changeGmailAccount = async () => {
+  try {
+    const { GoogleAuthProvider, signInWithPopup } = await import(
+      'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js'
+    );
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    const result = await signInWithPopup(auth, provider);
+    const user   = result.user;
+
+    document.getElementById('gmailDisplayName').textContent =
+      user.displayName || user.email.split('@')[0];
+    document.getElementById('gmailDisplayEmail').textContent = user.email;
+
+    document.getElementById('sbName').textContent = user.displayName || user.email.split('@')[0];
+    const av = document.getElementById('sbAv');
+    av.innerHTML = user.photoURL
+      ? `<img src="${user.photoURL}" alt="avatar"/>`
+      : (user.displayName?.[0] || 'U').toUpperCase();
+
+    dataCache = { today: null, week: null, month: null };
+    fetchAndRender(user.uid, currentRange, true);
+  } catch (err) {
+    console.error('Gmail switch failed:', err);
+    alert('Could not switch account: ' + err.message);
+  }
+};
+
+window.setRange=(btn,range)=>{
+  document.querySelectorAll('.trb').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentRange=range;
+  const badges={today:'Today',week:'This Week',month:'This Month'};
+  document.getElementById('rangeBadge').textContent=badges[range];
+  if(currentUser) fetchAndRender(getActiveUID()||currentUser.uid,range,false);
+};
+
+window.openDeviceModal=async()=>{
+  openModal('deviceModal');
+  document.getElementById('devName').textContent='Checking…';
+  document.getElementById('devSerial').textContent='—';
+  document.getElementById('devDot').className='device-dot disconnected';
+  document.getElementById('devStatusTag').textContent='Checking';
+  document.getElementById('devStatusTag').className='device-status-tag offline';
+  document.getElementById('devActions').style.display='none';
+  document.getElementById('devCollStatus').style.display='none';
+  try{
+    const r=await fetch(`${F}/api/status`,{signal:AbortSignal.timeout(4000)});
+    const d=await r.json();
+    const dot=document.getElementById('devDot');
+    if(d.devices&&d.devices.length>0){
+      const dev=d.devices[0];
+      currentDeviceSerial=dev.serial;
+      dot.className='device-dot connected';
+      document.getElementById('devName').textContent=dev.model||'Android Device';
+      document.getElementById('devSerial').textContent=
+        `Serial: ${dev.serial}${dev.android_ver?' • Android '+dev.android_ver:''}`;
+      document.getElementById('devStatusTag').textContent='Connected';
+      document.getElementById('devStatusTag').className='device-status-tag';
+      document.getElementById('devActions').style.display='flex';
+    }else if(d.unauthorized&&d.unauthorized.length>0){
+      dot.className='device-dot disconnected';
+      document.getElementById('devName').textContent='Unauthorized — Allow USB Debugging';
+      document.getElementById('devSerial').textContent=d.unauthorized[0];
+      document.getElementById('devStatusTag').textContent='Unauthorized';
+      document.getElementById('devStatusTag').className='device-status-tag offline';
+    }else{
+      dot.className='device-dot disconnected';
+      document.getElementById('devName').textContent='No device connected';
+      document.getElementById('devSerial').textContent='Connect via USB with ADB enabled';
+      document.getElementById('devStatusTag').textContent='Offline';
+      document.getElementById('devStatusTag').className='device-status-tag offline';
+    }
+  }catch(e){
+    document.getElementById('devName').textContent='Flask server offline';
+    document.getElementById('devSerial').textContent='Start app.py on localhost:5000';
+  }
+};
+
+window.triggerCollection=async()=>{
+  if(!currentUser||!currentDeviceSerial)return;
+  const targetUID = getActiveUID() || currentUser.uid;
+  try{
+    document.getElementById('devCollStatus').style.display='block';
+    document.getElementById('devCollStatusTxt').textContent='Starting…';
+    await fetch(`${F}/api/trigger/${targetUID}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({serial:currentDeviceSerial})
+    });
+    let polls=0;
+    const poll=setInterval(async()=>{
+      polls++;
+      try{
+        const r=await fetch(`${F}/api/collection_status/${targetUID}`);
+        const d=await r.json();
+        document.getElementById('devCollStatusTxt').textContent=d.status;
+        if(d.status==='live'||polls>20){
+          clearInterval(poll);
+          if(d.status==='live'){
+            dataCache={today:null,week:null,month:null};
+            fetchAndRender(targetUID,currentRange,false);
+          }
+        }
+      }catch(e){clearInterval(poll)}
+    },1500);
+  }catch(e){
+    document.getElementById('devCollStatusTxt').textContent='Error: '+e.message;
+  }
+};
+
+window.openRiskModal = async () => {
+  openModal('riskModal');
+  const st = dataCache.today;
+  
+  let mlFactors = null;
+  try {
+    const res  = await fetch(`${F}/api/ai_insights/${currentUser.uid}`);
+    const data = await res.json();
+    mlFactors  = data.ml_factors;
+  } catch(e) {}
+
+  const items = [
+    {label:'Overall Risk Score', val:`${st?.riskScore||0}/100`, color:riskColor(st?.riskLevel||'low')},
+    {label:'Risk Level',         val:capitalize(st?.riskLevel||'low'), color:riskColor(st?.riskLevel||'low')},
+    {label:'Daily Screen Time',  val:`${(st?.totalScreenTimeHr||0).toFixed(1)}h`,
+      color:(st?.totalScreenTimeHr||0)>settings.screenLimit?'var(--red)':'var(--green)'},
+    {label:'Social Media %',     val:`${(st?.socialMediaPct||0).toFixed(0)}%`,
+      color:(st?.socialMediaPct||0)>40?'var(--red)':'var(--green)'},
+    {label:'Phone Unlocks',      val:`${st?.unlockCount||0}`,
+      color:(st?.unlockCount||0)>80?'var(--red)':'var(--green)'},
+    {label:'ML Prediction',      val:st?.predictionLabel||capitalize(st?.riskLevel||'low')+' Risk User',
+      color:riskColor(st?.riskLevel||'low')},
+  ];
+
+  
+
+  document.getElementById('riskReportBody').innerHTML =
+    items.map(i=>`
+      <div class="setting-row">
+        <div class="setting-label">${i.label}</div>
+        <div style="font-size:12px;font-weight:700;color:${i.color}">${i.val}</div>
+      </div>`).join('');
+};
+
+window.openGoalsModal=()=>{
+  const st=dataCache.today;
+  const lim=settings.screenLimit;
+  const hr=st?(st.totalScreenTimeHr||0):0;
+  const goals=[
+    {ico:'⏱️',name:`Stay under ${lim}h screen time`,current:hr,target:lim,unit:'h',invert:true},
+    {ico:'🔓',name:'Fewer than 50 unlocks',current:st?(st.unlockCount||0):0,target:50,unit:'',invert:true},
+    {ico:'📱',name:'Social media under 30%',current:st?(st.socialMediaPct||0):0,target:30,unit:'%',invert:true},
+    {ico:'🧠',name:'Risk score below 50',current:st?(st.riskScore||0):0,target:50,unit:'',invert:true},
+  ];
+  document.getElementById('goalsList').innerHTML=goals.map(g=>{
+    const pct=Math.min((g.current/g.target)*100,100);
+    const met=g.invert?(g.current<=g.target):(g.current>=g.target);
+    const barColor=met?'var(--green)':'var(--red)';
+    return`<div class="goal-row">
+      <div class="goal-ico">${g.ico}</div>
+      <div class="goal-info">
+        <div class="goal-name">${g.name}</div>
+        <div class="goal-prog">${g.current.toFixed(1)}${g.unit} / ${g.target}${g.unit} — ${met?'✅ Met':'❌ Not met'}</div>
+      </div>
+      <div class="goal-bar-wrap"><div class="goal-bar" style="width:${pct}%;background:${barColor}"></div></div>
+      <div class="goal-pct">${pct.toFixed(0)}%</div>
+    </div>`;
+  }).join('');
+  openModal('goalsModal');
+};
+
+// ── Close modal on overlay click ──────────────────────────────────
+document.querySelectorAll('.modal-overlay').forEach(el=>{
+  el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open')});
+});
+
+document.getElementById('tbDate').textContent='// '+new Date().toLocaleDateString('en-GB',{
+  weekday:'long',day:'numeric',month:'long',year:'numeric'
+});
+
+function applySettings(){
+  clearInterval(autoRefreshTimer);
+  if(settings.autoRefresh){
+    autoRefreshTimer=setInterval(()=>{
+      if(currentUser&&currentRange==='today')fetchAndRender(currentUser.uid,'today',false);
+    },30000);
+  }
+}
+
+// ── AUTH STATE ────────────────────────────────────────────────────
+onAuthStateChanged(auth,async user=>{
+  if(!user){
+    document.getElementById('lo').style.display='none';
+    document.getElementById('ag').style.display='flex';
+    return;
+  }
+  currentUser=user;
+  const n=user.displayName||user.email.split('@')[0];
+  document.getElementById('sbName').textContent=n;
+  const av=document.getElementById('sbAv');
+  av.innerHTML=user.photoURL
+    ?`<img src="${user.photoURL}" alt="avatar"/>`
+    :(n[0]||'U').toUpperCase();
+  document.getElementById('ltxt').textContent='Loading your data…';
+  const newDevice=sessionStorage.getItem('analysedDevice');
+  if(newDevice && newDevice!==lastDisplayedDevice){
+    dataCache={today:null,week:null,month:null};
+    lastDisplayedDevice=newDevice;
+  }
+ await fetchAndRender(user.uid,'today',false);
+  setTimeout(()=>{
+    document.getElementById('lo').style.display='none';
+    document.getElementById('shell').style.display='flex';
+    applySettings();
+    loadSavedSettings();
+    // ── Multi-user boot ──
+    registerMonitoredUser(user, null, null);
+    // On fresh login, always reset active uid to the signed-in user
+    // (prevents a previous session's active uid from hijacking data)
+    if (!getActiveUID() || !getMUs().find(u => u.uid === getActiveUID())) {
+      setActiveUID(user.uid);
+    }
+    renderUserSwitcher();
+  },600);
+});
+
+// ── FETCH AND RENDER ──────────────────────────────────────────────
+async function fetchAndRender(uid,range,forceRefresh){
+  // ── Multi-user: uid passed in takes priority; fallback to active ──
+  // (switchToUser passes the target uid explicitly — don't override it)
+  if (!uid) uid = getActiveUID() || (currentUser?.uid || '');
+  setLoadingState(true);
+
+  if(!forceRefresh&&dataCache[range]){
+    renderRange(range,dataCache[range]);
+    setLoadingState(false);
+    return;
+  }
+
+  let st=null;
+
+  try{
+    const url=`${F}/api/user/${uid}${range!=='today'?'?range='+range:''}`;
+    const r=await fetch(url,{signal:AbortSignal.timeout(6000)});
+    if(r.ok){
+      const data=await r.json();
+      st=data.screenTimeData;
+    }
+  }catch(e){}
+
+  if(!st){
+    try{
+      const snap=await getDoc(doc(fbdb,'users',uid));
+      if(snap.exists()){
+        const fdata=snap.data()||{};
+        const todaySt=fdata.screenTimeData||{};
+        if(range==='today'){
+          st=todaySt||null;
+        }else if(range==='week'){
+          const week=fdata.week||[];
+          if(week.length){
+            st={range:'week',daily:week,riskScore:todaySt.riskScore||0,
+              riskLevel:todaySt.riskLevel||'low',forecast:todaySt.forecast||[],updatedAt:todaySt.updatedAt};
+          }
+        }else if(range==='month'){
+          const month=fdata.month||[];
+          if(month.length){
+            st={range:'month',daily:month,riskScore:todaySt.riskScore||0,
+              riskLevel:todaySt.riskLevel||'low',forecast:todaySt.forecast||[],updatedAt:todaySt.updatedAt};
+          }
+        }
+      }
+    }catch(e){console.warn('Firestore fallback error',e);}
+  }
+
+  setLoadingState(false);
+
+  if(st&&(st.riskScore!==undefined||st.daily)){
+    document.getElementById('syncBar').style.display='flex';
+    if(st.updatedAt){
+      document.getElementById('syncTime').textContent=new Date(st.updatedAt).toLocaleTimeString();
+    }
+    dataCache[range]=st;
+    renderRange(range,st);
+  }else{
+    if(!dataCache.today&&!dataCache.week&&!dataCache.month){
+      document.getElementById('noDataBanner').style.display='flex';
+    }
+  }
+}
+
+function setLoadingState(loading){
+  document.getElementById('rangeLoading').style.display=loading?'flex':'none';
+}
+
+function renderRange(range,st){
+  document.getElementById('noDataBanner').style.display='none';
+  if(range==='today'){
+    showTodayLayout(true);
+    renderStats(st,range);
+    renderAppTable(st.appUsage||st.appRisks||[]);
+    renderGauge(st.riskScore||0,st.riskLevel||'low',st);
+    renderPredictions(st.forecast || [], 'today', st);
+    renderLineChart(st.hourlyDistribution||{});
+    renderDoughnut(st.appUsage||st.appRisks||[]);
+    renderBarChart(st,range);
+    pushNotifications(st);
+    checkInappropriateContent(currentUser.uid);
+    autoTriggerAlerts(st);
+    // ── Multi-user: update badge for active user ──
+    updateMUBadge(getActiveUID(), st.riskLevel||'low', st.riskScore||0);
+  }else{
+    showTodayLayout(false);
+    renderStats(st,range);
+    renderBarChart(st,range);
+    renderPredictions(st.forecast || [], range, st);
+  }
+}
+
+// ── AUTO-TRIGGER: fires on every data load, checks all conditions ─
+let _autoAlertFired = false; // fire once per session
+async function autoTriggerAlerts(st) {
+  if (_autoAlertFired || !currentUser) return;
+  const score    = st.riskScore || 0;
+  const hrs      = st.totalScreenTimeHr || 0;
+  const social   = st.socialMediaPct || 0;
+  const unlocks  = st.unlockCount || 0;
+  const apps     = st.appUsage || [];
+  const overused = apps.filter(a => (a.minutes||0) >= 120); // >2h apps
+
+  const triggers = [];
+
+  if (score > settings.riskThreshold)
+    triggers.push({ reason:'high_risk', title:'🧠 High Addiction Risk Detected', body:`Your risk score is ${score}/100 — above the alert threshold. Daily usage: ${hrs.toFixed(1)}h. Immediate action recommended.` });
+
+  overused.forEach(a => {
+    const name = a.clean_name || cleanAppName(a.app_name||a.appName||'App');
+    const mins = Math.round(a.minutes||0);
+    const h = Math.floor(mins/60), m = mins%60;
+    triggers.push({ reason:'app_overuse', title:`📱 App Overuse: ${name}`, body:`You've spent ${h}h ${m}m on ${name} today — exceeds the 2-hour healthy limit. Risk level: ${(a.risk_level||'moderate').toUpperCase()}.` });
+  });
+
+  if (social > 40)
+    triggers.push({ reason:'social_overuse', title:'📱 Social Media Overuse', body:`${social.toFixed(0)}% of your screen time today was on social media apps. Recommended limit is 30%.` });
+
+  if (unlocks > 80)
+    triggers.push({ reason:'unlocks', title:'🔓 Compulsive Phone Checking', body:`${unlocks} phone unlocks detected today — a sign of compulsive checking behaviour.` });
+
+  if (triggers.length === 0) return;
+  _autoAlertFired = true;
+
+  // Show in-app alert banner
+  showAutoAlertBanner(triggers);
+
+  // Fire ntfy real push (shows actual popup on Android phone)
+  sendNtfyPush({
+    title: triggers[0].title,
+    body:  triggers[0].body,
+    priority: 'urgent',
+    tags: triggers.some(t=>t.reason==='adult') ? ['no_entry','warning'] : ['warning']
+  });
+
+  // Also try Flask backend
+  try {
+    await fetch(`${F}/api/send_alert/${currentUser.uid}`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        title: triggers[0].title,
+        body:  triggers[0].body,
+        priority: 'high', type: 'popup',
+        risk_score: score, screen_time_hr: hrs, social_pct: social,
+        triggers: triggers.map(t=>t.reason)
+      })
+    });
+  } catch(e) { /* silent */ }
+}
+
+// ── Show floating in-app alert banner ────────────────────────────
+function showAutoAlertBanner(triggers) {
+  const existing = document.getElementById('autoAlertBanner');
+  if (existing) existing.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'autoAlertBanner';
+  const topTrigger = triggers[0];
+  const isAdult = triggers.some(t => t.reason === 'adult');
+  const borderColor = isAdult ? '#ff4f6d' : triggers.some(t=>t.reason==='high_risk') ? '#ff4f6d' : '#ffb347';
+  banner.style.cssText = `
+    position:fixed;bottom:24px;right:24px;z-index:9999;
+    max-width:340px;width:calc(100vw - 48px);
+    background:#1a1a2e;border:1px solid ${borderColor}60;border-left:3px solid ${borderColor};
+    border-radius:12px;padding:14px 16px;
+    box-shadow:0 8px 32px rgba(0,0,0,.5);
+    animation:slideInBanner .35s cubic-bezier(.16,1,.3,1);
+    font-family:'Space Mono',monospace
+  `;
+
+  const style = document.createElement('style');
+  style.textContent = `@keyframes slideInBanner{from{transform:translateY(80px);opacity:0}to{transform:translateY(0);opacity:1}}`;
+  document.head.appendChild(style);
+
+  banner.innerHTML = `
+    <div style="display:flex;align-items:flex-start;gap:10px">
+      <div style="font-size:22px;flex-shrink:0">${isAdult?'🔞':triggers.some(t=>t.reason==='high_risk')?'🧠':'⚠️'}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:700;color:#fff;margin-bottom:3px">${topTrigger.title}</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.6);line-height:1.5;margin-bottom:8px">${topTrigger.body.slice(0,90)}${topTrigger.body.length>90?'…':''}</div>
+        ${triggers.length > 1 ? `<div style="font-size:9px;color:${borderColor};margin-bottom:8px">+${triggers.length-1} more alert${triggers.length>2?'s':''}</div>` : ''}
+        <div style="display:flex;gap:6px">
+          <button onclick="openModal('notifModal');document.getElementById('autoAlertBanner').remove()" style="
+            background:${borderColor}20;border:1px solid ${borderColor}40;color:${borderColor};
+            border-radius:6px;padding:4px 10px;font-size:9px;cursor:pointer;font-family:inherit;font-weight:700">View All</button>
+          <button onclick="document.getElementById('autoAlertBanner').remove()" style="
+            background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);
+            border-radius:6px;padding:4px 10px;font-size:9px;cursor:pointer;font-family:inherit">Dismiss</button>
+        </div>
+      </div>
+      <button onclick="document.getElementById('autoAlertBanner').remove()" style="
+        background:none;border:none;color:rgba(255,255,255,.3);font-size:14px;
+        cursor:pointer;padding:0;flex-shrink:0;line-height:1">✕</button>
+    </div>`;
+
+  document.body.appendChild(banner);
+  setTimeout(() => { if (banner.parentNode) banner.style.opacity='0'; banner.style.transition='opacity .4s'; setTimeout(()=>banner.remove(),400); }, 8000);
+}
+
+function showTodayLayout(show){
+  const disp=show?'grid':'none';
+  document.getElementById('todayCharts').style.display=disp;
+  document.getElementById('todayDetail').style.display=disp;
+}
+
+// ── STAT CARDS ────────────────────────────────────────────────────
+function renderStats(st,range){
+  if(range==='today'){
+    const hr=+(st.totalScreenTimeHr||0).toFixed(1);
+    const lim=settings.screenLimit;
+    const hm=`${Math.floor(hr)}h ${Math.round((hr%1)*60)}m`;
+    document.querySelector('.sc.c1 .si').textContent = '⏱️';
+    document.querySelector('.sc.c1 .slb').textContent = 'Total Screen Time';
+    document.getElementById('stTotal').textContent = hm;
+    document.getElementById('stTotalSub').textContent =
+      hr>lim?`⚠️ ${(hr-lim).toFixed(1)}h over ${lim}h limit`:'✅ Within healthy limit';
+    document.getElementById('stTopLabel').textContent='Most Used App';
+    let top = null;
+    if (st.appUsage && st.appUsage.length > 0) {
+      top = [...st.appUsage].sort((a,b) =>
+        (b.minutes || b.total_time_min || 0) - (a.minutes || a.total_time_min || 0)
+      )[0];
+    }
+    if (top) {
+      const rawName = top.app_name || top.appName || 'Unknown';
+      const name = top.clean_name || cleanAppName(rawName) || rawName;
+      const mins = top.minutes || top.total_time_min || 0;
+      document.getElementById('stTop').textContent = name.length > 14 ? name.slice(0,13)+'…' : name;
+      document.getElementById('stTopSub').textContent = `${Math.round(mins)} min today`;
+    } else {
+      document.getElementById('stTop').textContent = '—';
+      document.getElementById('stTopSub').textContent = '—';
+    }
+    document.getElementById('stHistoryLabel').textContent='URLs Visited Today';
+    document.getElementById('stHistoryCount').textContent='…';
+    document.getElementById('stHistorySub').textContent='Last updated just now';
+    fetch(`${F}/api/history/${currentUser.uid}`)
+      .then(r => r.json())
+      .then(data => {
+        document.getElementById('stHistoryCount').textContent = data.today_count ?? '—';
+        document.getElementById('stHistorySub').textContent =
+          data.today_count === 0 ? 'No visits today' : 'Unique URLs today';
+      })
+      .catch(() => {
+        document.getElementById('stHistoryCount').textContent = '—';
+        document.getElementById('stHistorySub').textContent = 'Could not load';
+      });
+  }else{
+    const daily=st.daily||[];
+    const totalHrs=daily.reduce((s,d)=>s+(d.total_hours||0),0);
+    const avgHrs=daily.length?totalHrs/daily.length:0;
+    const peak=daily.length?daily.reduce((a,b)=>(a.total_hours||0)>(b.total_hours||0)?a:b,daily[0]):null;
+    if (range === 'month') {
+      document.getElementById('stTotal').textContent = '…';
+      document.getElementById('stTotalSub').textContent = 'Fetching from device…';
+      fetch(`${F}/api/total_screen_time/${currentUser.uid}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.success) {
+            document.querySelector('.sc.c1 .si').textContent = '📅';
+            document.querySelector('.sc.c1 .slb').textContent = 'Lifetime Screen-On';
+            document.getElementById('stTotal').textContent = d.label;
+            document.getElementById('stTotalSub').textContent = `Since device setup · ${d.days}d total`;
+          } else {
+            document.querySelector('.sc.c1 .si').textContent = '⏱️';
+            document.querySelector('.sc.c1 .slb').textContent = 'Total Screen Time';
+            document.getElementById('stTotal').textContent = `${totalHrs.toFixed(1)}h`;
+            document.getElementById('stTotalSub').textContent = `Avg ${avgHrs.toFixed(1)}h/day over ${daily.length} days`;
+          }
+        })
+        .catch(() => {
+          document.getElementById('stTotal').textContent = `${totalHrs.toFixed(1)}h`;
+          document.getElementById('stTotalSub').textContent = `Avg ${avgHrs.toFixed(1)}h/day over ${daily.length} days`;
+        });
+    } else {
+      document.querySelector('.sc.c1 .si').textContent = '⏱️';
+      document.querySelector('.sc.c1 .slb').textContent = 'Total Screen Time';
+      document.getElementById('stTotal').textContent = `${totalHrs.toFixed(1)}h`;
+      document.getElementById('stTotalSub').textContent = `Avg ${avgHrs.toFixed(1)}h/day over ${daily.length} days`;
+    }
+    document.getElementById('stTopLabel').textContent='Peak Day';
+    document.getElementById('stTop').textContent=peak?peak.day:'—';
+    document.getElementById('stTopSub').textContent=peak?`${peak.total_hours.toFixed(1)}h`:'—';
+    document.getElementById('stHistoryLabel').textContent='Days Browsed';
+    document.getElementById('stHistoryCount').textContent=daily.length;
+    document.getElementById('stHistorySub').textContent=range==='week'?'Last 7 days':'Last 30 days';
+  }
+
+  const rl=st.riskLevel||'low';
+  const sc=document.getElementById('stRisk');
+  sc.textContent=capitalize(rl);
+  sc.style.color=riskColor(rl);
+  document.getElementById('stRiskSub').textContent=`ML score: ${st.riskScore||0} / 100`;
+}
+
+// ── APP TABLE ─────────────────────────────────────────────────────
+function renderAppTable(apps){
+  if(!apps||apps.length===0){
+    document.getElementById('atBody').innerHTML=
+      '<tr><td colspan="4" class="empty-row">No app data available</td></tr>';
+    return;
+  }
+  const maxM=Math.max(...apps.map(a=>a.minutes||a.total_time_min||0),1);
+  document.getElementById('atBody').innerHTML=apps.map(a => {
+    const mins  = a.minutes||a.total_time_min||0;
+    const rawName  = a.app_name||a.appName||'Unknown';
+    const name = a.clean_name || cleanAppName(rawName) || rawName;
+    const risk  = a.risk_level||a.riskLevel||'pending';
+    const color = risk==='high'?'#ff4f6d':risk==='medium'||risk==='moderate'?'#ffb347':risk==='low'?'#00e5a0':'#6c63ff';
+    const t     = mins>=60?`${Math.floor(mins/60)}h ${Math.round(mins%60)}m`:`${Math.round(mins)}m`;
+    const ico   = getAppIcon(rawName);
+    const bg    = getAppColor(rawName);
+    const pct   = (mins/maxM*100).toFixed(0);
+    return`<tr>
+      <td style="display:flex;align-items:center">
+        <span class="aico" style="background:${bg}">${ico}</span>
+        <span class="an" title="${rawName}">${name}</span>
+      </td>
+      <td class="app-time">${t}</td>
+      <td>
+        <div class="ubw"><div class="ub" style="width:${pct}%;background:${color}"></div></div>
+        <span class="app-pct">${pct}%</span>
+      </td>
+      <td>
+        <button onclick="sendAppAlert('${rawName}','${name}',${mins},'${risk}')" style="
+          background:${risk==='high'?'rgba(255,79,109,.15)':risk==='medium'||risk==='moderate'?'rgba(255,179,71,.12)':'rgba(108,99,255,.12)'};
+          border:1px solid ${risk==='high'?'rgba(255,79,109,.35)':risk==='medium'||risk==='moderate'?'rgba(255,179,71,.3)':'rgba(108,99,255,.25)'};
+          color:${risk==='high'?'#ff4f6d':risk==='medium'||risk==='moderate'?'#ffb347':'#a78bfa'};
+          border-radius:5px;padding:3px 8px;font-size:9px;cursor:pointer;
+          font-family:inherit;white-space:nowrap;letter-spacing:.04em
+        ">🔔 Alert</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+
+// ── GAUGE ─────────────────────────────────────────────────────────
+function renderGauge(score,level,st){
+  document.getElementById('gLabel').textContent=score;
+  const lbl={high:'HIGH RISK',moderate:'MODERATE RISK',low:'LOW RISK',minimal:'MINIMAL RISK'}[level]||'LOADING';
+  document.getElementById('gSub').textContent=`/ 100 — ${lbl}`;
+  const col=riskColor(level);
+  if(gaugeChart)gaugeChart.destroy();
+  gaugeChart=new Chart(document.getElementById('gaugeC'),{
+    type:'doughnut',
+    data:{datasets:[{
+      data:[score,100-score],
+      backgroundColor:[col,'rgba(30,30,53,.8)'],
+      borderColor:'transparent',borderWidth:0,
+      circumference:180,rotation:270
+    }]},
+    options:{responsive:false,cutout:'72%',
+             plugins:{legend:{display:false},tooltip:{enabled:false}}}
+  });
+  const factors=[];
+  if(st.socialMediaPct!=null)
+    factors.push({label:'Social media ratio',pct:Math.min(st.socialMediaPct,100),color:'#ff6b9d'});
+  if(st.totalScreenTimeHr)
+    factors.push({label:'Screen time excess',pct:Math.min((st.totalScreenTimeHr/14)*100,100),color:'#ff4f6d'});
+  factors.push({label:'Overall risk score',pct:score,color:'#6c63ff'});
+  document.getElementById('rfs').innerHTML=factors.slice(0,4).map(f=>`
+    <div class="rfr">
+      <div class="rfl">${f.label}</div>
+      <div class="rfbw"><div class="rfb" style="width:${f.pct.toFixed(0)}%;background:${f.color}"></div></div>
+      <div class="rfp">${f.pct.toFixed(0)}%</div>
+    </div>`).join('');
+}
+
+// ── 7-DAY FORECAST (sidebar panel) ───────────────────────────────
+function renderPredictions(forecast, range, st) {
+  if (range === 'today') {
+    // ── Left panel: Today's Stats ─────────────────────────────
+    const unlocks    = st.unlockCount    || 0;
+    const social     = st.socialMediaPct || 0;
+    const hrs        = st.totalScreenTimeHr || 0;
+    const avgSession = unlocks > 0 ? ((hrs * 60) / unlocks).toFixed(1) : '—';
+    const peakHour   = (() => {
+      const h = st.hourlyDistribution || {};
+      const entries = Object.entries(h);
+      if (!entries.length) return '—';
+      const peak = entries.reduce((a, b) => (+a[1] > +b[1] ? a : b));
+      return `${peak[0]}:00`;
+    })();
+    const stats = [
+      { ico: '🔓', label: 'Phone Unlocks',     val: unlocks },
+      { ico: '📱', label: 'Social Media',       val: `${social.toFixed(0)}%` },
+      { ico: '⏱️', label: 'Avg Session Length', val: avgSession === '—' ? '—' : `${avgSession}m` },
+      { ico: '🕐', label: 'Peak Usage Hour',    val: peakHour },
+      { ico: '🔥', label: 'Risk Score',         val: `${st.riskScore || 0}/100` },
+      { ico: '📊', label: 'Apps Used',          val: (st.appUsage || []).length },
+    ];
+    document.getElementById('predRows').innerHTML = stats.map(s => `
+      <div class="pr" style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+        <span style="font-size:16px">${s.ico}</span>
+        <div style="flex:1;font-size:12px;color:var(--text2)">${s.label}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text1)">${s.val}</div>
+      </div>`).join('');
+    document.querySelector('.pc .ct').textContent    = "Today's Stats";
+    document.querySelector('.pc .cs').textContent    = '// session breakdown';
+    document.querySelector('.ctag-green').textContent = 'Live';
+
+    
+    return;
+  }
+
+  const activeForecast = (forecast && forecast.length)
+    ? forecast
+    : (dataCache.today?.forecast || []);
+
+  document.querySelector('.pc .ct').textContent     = '7-Day Forecast';
+  document.querySelector('.pc .cs').textContent     = '// ML predicted usage';
+  document.querySelector('.ctag-green').textContent = 'Model Active';
+  renderForecastBars(activeForecast, dataCache.today || st);  // ← pass today's st for fallback
+}
+
+// ── Standalone: renders the 7-day bar rows into #predRows ─────────
+function renderForecastBars(forecast, st) {
+  // Generate client-side forecast if server didn't return one
+  if (!forecast || !forecast.length) {
+    const hrs = st?.totalScreenTimeHr || 0;
+    if (hrs > 0) {
+      forecast = generateForecastClient(hrs, st?.riskScore || 50);
+    }
+  }
+
+  if (!forecast || !forecast.length) {
+    document.getElementById('predRows').innerHTML =
+      '<div style="color:var(--text2);font-size:11px;padding:8px">No forecast data available</div>';
+    return;
+  }
+
+  const max = Math.max(...forecast.map(f => f.predicted_hr || f.predictedHr || 0), 1);
+  document.getElementById('predRows').innerHTML = forecast.slice(0, 7).map(f => {
+    const h = +(f.predicted_hr || f.predictedHr || 0);
+    return `<div class="pr">
+      <div class="pd">${f.day}</div>
+      <div class="pbw"><div class="pb" style="width:${(h / max * 100).toFixed(0)}%"></div></div>
+      <div class="pt">${h}h</div>
+    </div>`;
+  }).join('');
+}
+// ── NOTIFICATIONS ─────────────────────────────────────────────────
+async function pushNotifications(st) {
+  const threshold = settings.riskThreshold;
+  const lim       = settings.screenLimit;
+  const notes     = [];
+
+  if ((st.riskScore || 0) > threshold)
+    notes.push({ico:'🧠', title:'High Addiction Risk', sub:`ML score ${st.riskScore}/100 — above your ${threshold} alert threshold`});
+  if ((st.totalScreenTimeHr || 0) > lim)
+    notes.push({ico:'⏱️', title:'Screen Limit Exceeded', sub:`${(st.totalScreenTimeHr||0).toFixed(1)}h used — ${((st.totalScreenTimeHr||0)-lim).toFixed(1)}h over your ${lim}h limit`});
+  if ((st.socialMediaPct || 0) > 40)
+    notes.push({ico:'📱', title:'Social Media Overuse', sub:`${(st.socialMediaPct||0).toFixed(0)}% of screen time on social apps`});
+  if ((st.unlockCount || 0) > 80)
+    notes.push({ico:'🔓', title:'Excessive Unlocks', sub:`${st.unlockCount} phone unlocks today`});
+
+  const hourly    = st.hourlyDistribution || {};
+  const nightMins = [22,23,0,1,2,3,4,5].reduce((s,h) => s + (hourly[String(h)] || 0), 0);
+  const totalMins = Object.values(hourly).reduce((s,v) => s + v, 0) || 1;
+  if ((nightMins / totalMins) * 100 > 20)
+    notes.push({ico:'🌙', title:'Late Night Usage', sub:`${((nightMins/totalMins)*100).toFixed(0)}% of usage after 10PM`});
+
+  try {
+    const res  = await fetch(`${F}/api/ai_insights/${currentUser.uid}`);
+    const data = await res.json();
+    if (data.insights?.length) {
+      data.insights.filter(i => i.severity === 'high').forEach(i => {
+        const alreadyCovered = notes.some(n => n.title.toLowerCase().includes(i.title.toLowerCase().slice(0,8)));
+        if (!alreadyCovered)
+          notes.push({ico: i.icon || '🤖', title: i.title, sub: i.body?.slice(0, 80) + (i.body?.length > 80 ? '…' : '')});
+      });
+    }
+  } catch(e) {}
+
+  if (notes.length === 0)
+    notes.push({ico:'✅', title:'All Clear', sub:'Your usage patterns look healthy today — keep it up!'});
+
+  document.getElementById('notifList').innerHTML = notes.map((n, i) => `
+    <div class="notif-item" style="${i > 0 ? 'border-top:1px solid rgba(255,255,255,.05);padding-top:8px;margin-top:4px' : ''}">
+      <div class="notif-ico">${n.ico}</div>
+      <div class="notif-body">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-sub">${n.sub}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('notifDot').style.display =
+    notes.some(n => n.ico !== '✅') ? 'block' : 'none';
+
+  const alertCount = notes.filter(n => n.ico !== '✅').length;
+  const bell = document.querySelector('.nb2');
+  if (bell) {
+    bell.innerHTML = `🔔${alertCount > 0
+      ? `<div class="nd" id="notifDot" style="display:block">${alertCount > 9 ? '9+' : alertCount}</div>`
+      : `<div class="nd" id="notifDot" style="display:none"></div>`}`;
+  }
+}
+
+// ── LINE CHART ────────────────────────────────────────────────────
+function renderLineChart(hourly){
+  const data=Array.from({length:24},(_,i)=>hourly[String(i)]||hourly[i]||0);
+  if(lineChart)lineChart.destroy();
+  lineChart=new Chart(document.getElementById('lineC'),{
+    type:'line',
+    data:{
+      labels:Array.from({length:24},(_,i)=>`${i}:00`),
+      datasets:[{
+        label:'Minutes',data,
+        borderColor:'#6c63ff',backgroundColor:'rgba(108,99,255,.07)',
+        fill:true,tension:.45,pointRadius:0,pointHoverRadius:5,borderWidth:2.5
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw} min`}}},
+      scales:{
+        x:{grid:{color:GC},ticks:{maxTicksLimit:8}},
+        y:{grid:{color:GC},ticks:{callback:v=>`${v}m`},beginAtZero:true}
+      }
+    }
+  });
+}
+
+// ── DOUGHNUT ──────────────────────────────────────────────────────
+function renderDoughnut(apps){
+  if(!apps||apps.length===0)return;
+  const COLORS=['#6c63ff','#ff6b9d','#00d4ff','#ffb347','#00e5a0','#ff4f6d','#a78bfa','#34d399'];
+  const labels=apps.slice(0,6).map(a=>a.clean_name||cleanAppName(a.app_name||a.appName||'App'));
+  const vals=apps.slice(0,6).map(a=>Math.max(a.minutes||a.total_time_min||0,0.1));
+  const cols=COLORS.slice(0,labels.length);
+  if(doughChart)doughChart.destroy();
+  doughChart=new Chart(document.getElementById('doughC'),{
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:cols,borderColor:'#111120',borderWidth:3,hoverOffset:7}]},
+    options:{
+      responsive:true,cutout:'66%',
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>{
+        const tot=c.dataset.data.reduce((a,b)=>a+b,0);
+        return`${c.label}: ${((c.raw/tot)*100).toFixed(0)}%`;
+      }}}}
+    }
+  });
+  document.getElementById('dLeg').innerHTML=labels.map((l,i)=>
+    `<div class="dleg-item"><span class="dleg-dot" style="background:${cols[i]}"></span>${l}</div>`
+  ).join('');
+}
+
+// ── BAR CHART ─────────────────────────────────────────────────────
+function renderBarChart(st, range) {
+  if (barChart) barChart.destroy();
+  if (range === 'today') {
+    document.getElementById('barTitle').textContent = 'Top Apps Today';
+    document.getElementById('barSub').textContent = '// time spent per app (minutes)';
+    const apps   = (st.appUsage || st.appRisks || []).slice(0, 7);
+    const labels = apps.map(a => a.clean_name || cleanAppName(a.app_name || a.appName || 'App'));
+    const data   = apps.map(a => Math.round(a.minutes || a.total_time_min || 0));
+    const colors = apps.map(a => {
+      const r = a.risk_level || a.riskLevel || 'low';
+      return r === 'high' ? '#ff4f6d' : r === 'moderate' || r === 'medium' ? '#ffb347' : '#6c63ff';
+    });
+    barChart = new Chart(document.getElementById('barC'), {
+      type: 'bar',
+      data: {labels, datasets: [{label:'Minutes',data,backgroundColor:colors,borderRadius:5,borderSkipped:false}]},
+      options: {
+        responsive:true,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw} min`}}},
+        scales:{x:{grid:{display:false}},y:{grid:{color:GC},ticks:{callback:v=>`${v}m`},beginAtZero:true}}
+      }
+    });
+    return;
+  }
+  const daily  = st.daily || [];
+  const labels = daily.map(d => range === 'month' ? d.date.slice(5) : d.day);
+  const data   = daily.map(d => d.total_hours || 0);
+  const today  = new Date().toISOString().slice(0, 10);
+  const todayColors = daily.map(d => d.date === today ? '#6c63ff' : 'rgba(108,99,255,.22)');
+  document.getElementById('barTitle').textContent = range === 'week' ? 'Last 7 Days' : 'Last 30 Days';
+  document.getElementById('barSub').textContent = '// daily totals (hours)';
+  barChart = new Chart(document.getElementById('barC'), {
+    type: 'bar',
+    data: {labels, datasets: [{label:'Hours',data,backgroundColor:todayColors,borderRadius:4,borderSkipped:false}]},
+    options: {
+      responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.raw}h`}}},
+      scales:{
+        x:{grid:{display:false},ticks:{maxTicksLimit:range==='month'?10:7,maxRotation:45}},
+        y:{grid:{color:GC},ticks:{callback:v=>`${v}h`},beginAtZero:true}
+      }
+    }
+  });
+}
+
+// ── CLIENT-SIDE FORECAST FALLBACK ─────────────────────────────────
+function generateForecastClient(todayHrs, riskScore) {
+  const days     = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+  const seed     = new Date().getFullYear() * 100 + Math.floor((new Date() - new Date(new Date().getFullYear(),0,0)) / 86400000 / 7);
+  const rng = (i) => { const x = Math.sin(seed + i) * 10000; return x - Math.floor(x); };
+  return days.map((day, i) => {
+    let h;
+    if (i === todayIdx) { h = todayHrs; }
+    else {
+      const isWeekend = i >= 5;
+      const base      = todayHrs * (isWeekend ? 1.2 : 0.85);
+      h = Math.max(0.3, base + (rng(i) - 0.5) * 1.4);
+    }
+    return { day, predicted_hr: Math.round(h * 10) / 10 };
+  });
+}
+
+// ── ML FACTOR BARS ────────────────────────────────────────────────
+function renderMLFactors(factors, score, level) {
+  const factorDefs = [
+    {key:'screen_time',   label:'Screen Time',     color:'#ff4f6d'},
+    {key:'social_media',  label:'Social Media',    color:'#ff6b9d'},
+    {key:'unlocks',       label:'Phone Unlocks',   color:'#ffb347'},
+    {key:'night_usage',   label:'Night Usage',     color:'#6c63ff'},
+    {key:'concentration', label:'App Focus',       color:'#00d4ff'},
+  ];
+  document.getElementById('rfs').innerHTML = factorDefs.map(f => `
+    <div class="rfr">
+      <div class="rfl">${f.label}</div>
+      <div class="rfbw"><div class="rfb" style="width:${factors[f.key]||0}%;background:${f.color}"></div></div>
+      <div class="rfp">${factors[f.key]||0}%</div>
+    </div>`).join('');
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────────
+function capitalize(s){return s?s.charAt(0).toUpperCase()+s.slice(1):s}
+
+function riskColor(level){
+  return level==='high'?'var(--red)'
+        :level==='moderate'?'var(--accent4)'
+        :level==='minimal'?'var(--green)'
+        :'var(--accent)';
+}
+
+function getAppIcon(name){
+  const n=(name||'').toLowerCase();
+  if(n.includes('instagram')||n.includes('honista'))return'📸';
+  if(n.includes('whatsapp'))return'💬';
+  if(n.includes('telegram'))return'✈️';
+  if(n.includes('snapchat'))return'👻';
+  if(n.includes('youtube'))return'▶️';
+  if(n.includes('facebook'))return'👍';
+  if(n.includes('twitter')||n.includes('x.com'))return'🐦';
+  if(n.includes('tiktok'))return'🎵';
+  if(n.includes('linkedin'))return'💼';
+  if(n.includes('netflix'))return'🎬';
+  if(n.includes('spotify'))return'🎧';
+  if(n.includes('chrome')||n.includes('browser'))return'🌐';
+  if(n.includes('gmail')||n.includes('outlook'))return'📧';
+  if(n.includes('game')||n.includes('clash')||n.includes('pubg')||n.includes('roblox'))return'🎮';
+  return'📱';
+}
+
+function getAppColor(name){
+  const n=(name||'').toLowerCase();
+  if(n.includes('instagram')||n.includes('honista'))return'rgba(225,48,108,.15)';
+  if(n.includes('whatsapp'))return'rgba(37,211,102,.12)';
+  if(n.includes('telegram'))return'rgba(0,136,204,.12)';
+  if(n.includes('snapchat'))return'rgba(255,252,0,.1)';
+  if(n.includes('youtube'))return'rgba(255,0,0,.1)';
+  if(n.includes('facebook'))return'rgba(24,119,242,.12)';
+  if(n.includes('twitter')||n.includes('x.com'))return'rgba(29,161,242,.12)';
+  if(n.includes('linkedin'))return'rgba(0,119,181,.12)';
+  if(n.includes('spotify'))return'rgba(30,215,96,.1)';
+  return'rgba(108,99,255,.12)';
+}
+
+// ══════════════════════════════════════════════════════════════════
+// WHATSAPP ALERT
+// ══════════════════════════════════════════════════════════════════
+window.openWhatsAppModal = () => {
+  openModal('whatsappModal');
+  // Pre-fill phone from settings
+  const saved = localStorage.getItem('ss_mobile_number') || '';
+  const inp = document.getElementById('waPhoneInput');
+  if (inp && saved && !inp.value) inp.value = saved;
+  updateWaPreview();
+};
+
+function buildWaMessage() {
+  const st    = dataCache.today || {};
+  const score   = st.riskScore || 0;
+  const level   = capitalize(st.riskLevel || 'low');
+  const hrs     = (st.totalScreenTimeHr || 0).toFixed(1);
+  const social  = (st.socialMediaPct || 0).toFixed(0);
+  const unlocks = st.unlockCount || 0;
+  const apps    = st.appUsage || [];
+  const date    = new Date().toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
+  const hourly  = st.hourlyDistribution || {};
+  const nightMins = [22,23,0,1,2,3,4,5].reduce((s,h)=>s+(hourly[String(h)]||0),0);
+  const totalHMin = Object.values(hourly).reduce((s,v)=>s+v,0)||1;
+  const nightPct  = ((nightMins/totalHMin)*100).toFixed(0);
+
+  const lines = ['📱 *ScreenSense AI — Usage Alert*', `📅 ${date}`, `👤 ${currentUser?.displayName||currentUser?.email||'User'}`, ''];
+
+  if (document.getElementById('waTrigRisk')?.checked && score > settings.riskThreshold)
+    lines.push(`🧠 *Risk Score:* ${score}/100 — ${level} Risk ⚠️`);
+
+  if (document.getElementById('waTrigScreen')?.checked && +hrs > settings.screenLimit)
+    lines.push(`⏱️ *Screen Time:* ${hrs}h (${(+hrs - settings.screenLimit).toFixed(1)}h over ${settings.screenLimit}h limit)`);
+
+  if (document.getElementById('waTrigAppOveruse')?.checked) {
+    const overused = apps.filter(a => (a.minutes||0) >= 120);
+    overused.slice(0,2).forEach(a => {
+      const nm  = a.clean_name||cleanAppName(a.app_name||a.appName||'App');
+      const h   = Math.floor((a.minutes||0)/60), m = Math.round((a.minutes||0)%60);
+      lines.push(`📱 *App Overuse:* ${nm} — ${h}h ${m}m (exceeds 2h limit)`);
+    });
+  }
+
+  if (document.getElementById('waTrigAdult')?.checked)
+    lines.push(`🔞 *Inappropriate content monitoring is ACTIVE* — any adult/harmful sites will trigger an alert`);
+
+  if (document.getElementById('waTrigSocial')?.checked && +social > 40)
+    lines.push(`📲 *Social Media:* ${social}% of screen time (recommended < 30%)`);
+
+  if (document.getElementById('waTrigNight')?.checked && +nightPct > 20)
+    lines.push(`🌙 *Late Night Usage:* ${nightPct}% of usage after 10PM — sleep disruption risk`);
+
+  lines.push('', `🔓 Unlocks: ${unlocks}  |  Risk: ${score}/100  |  Screen: ${hrs}h`);
+  lines.push('', '🔗 Open ScreenSense AI for the full report and detailed breakdown.');
+  return lines.join('\n');
+}
+
+function updateWaPreview() {
+  const el = document.getElementById('waPreview');
+  if (el) el.textContent = buildWaMessage();
+}
+
+
+window.sendWhatsAppAlert = async () => {
+  if (!currentUser) return;
+
+  const phone = document.getElementById('waPhoneInput')?.value?.trim();
+  if (!phone) {
+    alert('Please enter a WhatsApp number.\n\nYou can save it permanently in ⚙️ Settings → Alert Contact.');
+    return;
+  }
+
+  // Persist phone number for future use
+  localStorage.setItem('ss_mobile_number', phone);
+  const settingsInput = document.getElementById('settingsMobileNumber');
+  if (settingsInput) settingsInput.value = phone;
+
+  const btn      = document.getElementById('waSendBtn');
+  const statusEl = document.getElementById('waStatus');
+  const origText = btn.textContent;
+  btn.textContent = '⏳ Sending…';
+  btn.disabled    = true;
+  statusEl.style.display = 'block';
+  statusEl.style.color   = 'var(--text2)';
+  statusEl.textContent   = 'Connecting…';
+
+  // Use app-specific override message if triggered from Alert button, else build fresh
+  const message = window._waOverrideMessage || buildWaMessage();
+  window._waOverrideMessage = null;
+
+  const cleanPhone = phone.replace(/\D/g, '');
+  const waUrl      = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+  // ── 1. Try Flask backend (real send via Twilio/pywhatkit/etc.) ───
+  let flaskSent = false;
+  try {
+    const controller = new AbortController();
+    const timeout    = setTimeout(() => controller.abort(), 4000); // 4s timeout
+    const res  = await fetch(`${F}/api/send_whatsapp`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ uid: currentUser.uid, phone, message }),
+      signal:  controller.signal
+    });
+    clearTimeout(timeout);
+    const data = await res.json();
+    if (data.success) {
+      flaskSent = true;
+      statusEl.style.color = '#25d366';
+      statusEl.textContent = '✅ WhatsApp message sent successfully!';
+      btn.textContent = '✅ Sent!';
+      setTimeout(() => {
+        btn.textContent = origText;
+        btn.disabled    = false;
+      }, 3000);
+      return; // done — no need for fallback
+    }
+  } catch (err) {
+    // Timeout or network error — fall through to wa.me silently
+    console.warn('[ScreenSense] Flask WhatsApp unavailable, using wa.me fallback:', err.message);
+  }
+
+  // ── 2. Fallback: open wa.me deep link (always works, zero setup) ─
+  // This opens WhatsApp (mobile or web) with the message pre-filled.
+  // User just taps the green Send button — one tap.
+  window.open(waUrl, '_blank');
+
+  statusEl.style.color = '#25d366';
+  statusEl.innerHTML = `
+    <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+      <span style="font-size:16px">💬</span>
+      <span>WhatsApp opened — tap <strong>Send</strong> to deliver the alert</span>
+    </div>
+    <div style="font-size:9px;color:var(--text2);margin-top:4px">
+      Message is pre-filled. If WhatsApp didn't open,
+      <a href="${waUrl}" target="_blank" style="color:#25d366">click here ↗</a>
+    </div>`;
+
+  btn.textContent = '💬 Re-open WhatsApp';
+  btn.disabled    = false;
+  // Override click to re-open wa.me on repeat presses
+  btn.onclick = () => {
+    window.open(waUrl, '_blank');
+    btn.onclick = null; // reset after one use
+  };
+  setTimeout(() => {
+    if (btn.textContent === '💬 Re-open WhatsApp') {
+      btn.textContent = origText;
+      btn.onclick     = null;
+    }
+  }, 15000);
+};
+
+
+// ══════════════════════════════════════════════════════════════════
+// FIXED: sendAppAlert  (Alert button on each app row)
+// Same pattern: ntfy → Flask → wa.me fallback (silent, no error shown)
+// ══════════════════════════════════════════════════════════════════
+
+window.sendAppAlert = async (rawName, cleanName, mins, risk) => {
+  if (!currentUser) return;
+
+  const st        = dataCache.today || {};
+  const totalHr   = st.totalScreenTimeHr || 0;
+  const social    = st.socialMediaPct    || 0;
+  const riskScore = st.riskScore         || 0;
+  const pctOfDay  = totalHr > 0 ? ((mins / (totalHr * 60)) * 100).toFixed(0) : 0;
+  const timeStr   = mins >= 60 ? `${Math.floor(mins/60)}h ${Math.round(mins%60)}m` : `${Math.round(mins)}m`;
+
+  const pushTitle = `⚠️ ScreenSense: ${cleanName} Overuse`;
+  const pushBody  = `${timeStr} on ${cleanName} today (${pctOfDay}% of screen time). Risk: ${risk.toUpperCase()}. Total: ${totalHr.toFixed(1)}h.`;
+
+  const waMsg = [
+    `📱 *ScreenSense AI — App Alert*`,
+    ``,
+    `⚠️ *App:* ${cleanName}`,
+    `⏱️ *Time spent:* ${timeStr} today (${pctOfDay}% of screen time)`,
+    `🚦 *Risk level:* ${risk.toUpperCase()}`,
+    ``,
+    `📊 Overall: ${totalHr.toFixed(1)}h screen time · Social ${social.toFixed(0)}% · Risk ${riskScore}/100`,
+    ``,
+    `Consider taking a break. Open ScreenSense for the full report.`
+  ].join('\n');
+
+  // Visual feedback
+  const btn      = event?.target;
+  const origHTML = btn?.innerHTML;
+  if (btn) { btn.innerHTML = '⏳'; btn.disabled = true; }
+
+  // ── 1. ntfy real push (shows popup on Android) ───────────────
+  const ntfyOk = await sendNtfyPush({
+    title:    pushTitle,
+    body:     pushBody,
+    priority: risk === 'high' ? 'urgent' : 'high',
+    tags:     risk === 'high' ? ['warning', 'skull'] : ['warning']
+  });
+
+  // ── 2. Also fire Flask (best-effort, silent fail) ─────────────
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 3000);
+    await fetch(`${F}/api/send_alert/${currentUser.uid}`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        title:         pushTitle,
+        body:          pushBody,
+        app_name:      rawName,
+        clean_name:    cleanName,
+        minutes:       mins,
+        risk_level:    risk,
+        screen_time_hr: totalHr,
+        social_pct:    social,
+        risk_score:    riskScore
+      }),
+      signal: ctrl.signal
+    });
+  } catch (_) { /* silent — ntfy already fired */ }
+
+  // ── 3. Open WhatsApp modal pre-filled (always works) ─────────
+  const savedPhone = localStorage.getItem('ss_mobile_number') || '';
+  window._waOverrideMessage = waMsg;
+  openModal('whatsappModal');
+  setTimeout(() => {
+    const phoneInput = document.getElementById('waPhoneInput');
+    const preview    = document.getElementById('waPreview');
+    if (phoneInput && savedPhone && !phoneInput.value) phoneInput.value = savedPhone;
+    if (preview) preview.textContent = waMsg;
+  }, 50);
+
+  // Restore button
+  if (btn) {
+    btn.innerHTML = ntfyOk ? '✅ Sent' : '🔔 Alert';
+    btn.disabled  = false;
+    if (ntfyOk) setTimeout(() => { if (btn) btn.innerHTML = origHTML; }, 2500);
+  }
+};
+
+
+// ══════════════════════════════════════════════════════════════════
+// HELPER: Save ML config changes to Flask (best-effort)
+// ══════════════════════════════════════════════════════════════════
+
+window.saveMLConfig = async (key, value) => {
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 3000);
+    await fetch(`${F}/api/risk_config`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ [key]: parseFloat(value) }),
+      signal:  ctrl.signal
+    });
+  } catch (_) {
+    // Flask offline — setting saved in UI only, will apply on next server start
+    console.warn('[ScreenSense] ML config: Flask offline, change is UI-only until server restarts');
+  }
+};
+
+
+// ══════════════════════════════════════════════════════════════════
+// SETTINGS HELPERS — phone, FCM, ntfy
+// ══════════════════════════════════════════════════════════════════
+
+window.savePhoneNumber = (val) => {
+  localStorage.setItem('ss_mobile_number', val.trim());
+  // Keep WhatsApp modal in sync
+  const waInp = document.getElementById('waPhoneInput');
+  if (waInp) waInp.value = val.trim();
+};
+
+
+function loadSavedSettings() {
+  const phone = localStorage.getItem('ss_mobile_number') || '';
+  const el1 = document.getElementById('settingsMobileNumber');
+  if (el1 && phone) el1.value = phone;
+
+  if (currentUser) {
+    const topic = `screensense-${currentUser.uid.slice(0, 12)}`;
+    localStorage.setItem('ss_ntfy_topic', topic);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════
+// REAL ANDROID PUSH via ntfy.sh
+// ══════════════════════════════════════════════════════════════════
+// HOW TO GET REAL ANDROID POPUPS (zero-setup, completely free):
+//
+//  1. Install "ntfy" from Play Store on your Android phone
+//  2. Open ntfy → tap + → enter your topic shown in Settings
+//     (e.g.  screensense-abc123456789)
+//  3. That's it — any call to sendNtfyPush() shows a real
+//     heads-up popup notification on your phone, even locked screen.
+//
+//  Your Android data-collection app can ALSO call this same API
+//  so alerts fire directly from the device without needing the
+//  dashboard to be open.
+//
+//  Flask backend can call:
+//    POST https://ntfy.sh/{topic}
+//    Headers: Title, Priority (urgent/high/default), Tags
+//    Body: plain text message
+// ──────────────────────────────────────────────────────────────────
+async function sendNtfyPush({ title, body, priority = 'high', tags = ['warning'] }) {
+  const topic = localStorage.getItem('ss_ntfy_topic');
+  if (!topic) {
+    console.warn('ntfy: no topic set — open Settings to see your topic');
+    return false;
+  }
+  try {
+    const res = await fetch(`https://ntfy.sh/${topic}`, {
+      method: 'POST',
+      headers: {
+        'Title':    encodeURIComponent(title),   // ← fix: encode to avoid ISO-8859-1 error
+        'Priority': priority,
+        'Tags':     tags.join(','),
+        'Content-Type': 'text/plain; charset=utf-8',
+      },
+      body
+    });
+    return res.ok;
+  } catch(e) {
+    console.warn('ntfy push failed:', e.message);
+    return false;
+  }
+}
+// Updated sendAndroidPush: sends via ntfy for real popup + falls back to Flask
+window.openAndroidPushModal = () => {
+  openModal('androidPushModal');
+  updatePushPreview();
+};
+
+
+function buildPushMessage() {
+  const st    = dataCache.today || {};
+  const score = st.riskScore || 0;
+  const hrs   = (st.totalScreenTimeHr || 0).toFixed(1);
+  const level = capitalize(st.riskLevel || 'low');
+  if (score > 70) return `⚠️ High addiction risk detected! Score: ${score}/100. ${hrs}h screen time today. Open ScreenSense for details.`;
+  if (+hrs > settings.screenLimit) return `⏱️ Screen time limit exceeded — ${hrs}h used today (limit: ${settings.screenLimit}h). Take a break!`;
+  return `📊 ScreenSense Daily Check-In: Risk ${score}/100 · ${hrs}h screen time · ${level} risk level.`;
+}
+
+function updatePushPreview() {
+  const custom = document.getElementById('togCustomMsg')?.classList.contains('on');
+  const msg = custom ? (document.getElementById('customPushMsg')?.value || buildPushMessage()) : buildPushMessage();
+  const el1 = document.getElementById('pushPreviewTitle');
+  const el2 = document.getElementById('pushPreviewBody');
+  if (el1) el1.textContent = '⚠️ ScreenSense AI Alert';
+  if (el2) el2.textContent = msg;
+}
+
+window.toggleCustomMsg = (btn) => {
+  btn.classList.toggle('on');
+  const area = document.getElementById('customPushMsg');
+  if (area) area.style.display = btn.classList.contains('on') ? 'block' : 'none';
+  updatePushPreview();
+};
+
+window.sendAndroidPush = async () => {
+  if (!currentUser) return;
+  const btn      = document.getElementById('pushSendBtn');
+  const statusEl = document.getElementById('pushStatus');
+  const custom   = document.getElementById('togCustomMsg')?.classList.contains('on');
+  const msg      = custom ? (document.getElementById('customPushMsg')?.value || buildPushMessage()) : buildPushMessage();
+  const priority = document.getElementById('pushPriority')?.value || 'high';
+
+  btn.textContent = '⏳ Sending…'; btn.disabled = true;
+  statusEl.style.display = 'block'; statusEl.style.color = 'var(--text2)';
+  statusEl.textContent = 'Sending real push to your Android phone…';
+
+  const st    = dataCache.today || {};
+  const score = st.riskScore || 0;
+  const hrs   = (st.totalScreenTimeHr || 0).toFixed(1);
+
+  // 1. ntfy.sh → real Android heads-up popup (primary method)
+  const ntfyOk = await sendNtfyPush({
+    title:    '⚠️ ScreenSense AI Alert',
+    body:     msg,
+    priority: priority === 'high' ? 'urgent' : priority,
+    tags:     score > 70 ? ['warning','skull'] : ['warning']
+  });
+
+  // 2. Also try Flask backend (secondary)
+  let flaskOk = false;
+  try {
+    const res  = await fetch(`${F}/api/send_alert/${currentUser.uid}`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ title:'⚠️ ScreenSense AI Alert', body: msg, priority, type:'popup', risk_score: score, screen_time_hr: +hrs })
+    });
+    const data = await res.json();
+    flaskOk = !!data.success;
+  } catch(_) {}
+
+  if (ntfyOk) {
+    statusEl.style.color = '#00e5a0';
+    statusEl.innerHTML = `✅ Real push sent via ntfy!<br><span style="font-size:9px;color:var(--text2)">Check your phone — you should see a heads-up popup.</span>`;
+    btn.textContent = '✅ Sent!';
+  } else if (flaskOk) {
+    statusEl.style.color = '#ffb347';
+    statusEl.innerHTML = `⚠️ Flask message sent (not a real popup).<br><span style="font-size:9px;color:var(--text2)">For real popups, install ntfy app & set your topic in ⚙️ Settings.</span>`;
+    btn.textContent = '⚠️ Partial';
+  } else {
+    statusEl.style.color = '#ff4f6d';
+    statusEl.innerHTML = `❌ Push failed.<br><span style="font-size:9px;color:var(--text2)">Set your ntfy topic in ⚙️ Settings → Alert Contact first.</span>`;
+    btn.textContent = '❌ Failed';
+  }
+
+  setTimeout(() => { btn.textContent = '🔔 Send Push Now'; btn.disabled = false; }, 3500);
+};
+
+// ── Scan browsing history for adult/inappropriate content & auto-alert ──
+window.sendAdultContentAlert = async () => {
+  if (!currentUser) return;
+  const statusEl = document.getElementById('pushStatus');
+  statusEl.style.display = 'block'; statusEl.style.color = 'var(--text2)';
+  statusEl.textContent = '🔍 Scanning browsing history for inappropriate content…';
+
+  try {
+    const res  = await fetch(`${F}/api/history_insights/${currentUser.uid}`);
+    const data = await res.json();
+
+    const adultPct  = data.category_breakdown?.adult_risk?.pct || 0;
+    const adultSites = data.top_domains?.filter(([d]) =>
+      /porn|xxx|adult|sex|nsfw|xvideos|xhamster|pornhub|onlyfans|redtube|youporn/i.test(d)
+    ) || [];
+
+    if (adultPct > 0 || adultSites.length > 0) {
+      const siteList = adultSites.slice(0,3).map(([d]) => d).join(', ') || 'flagged sites';
+      const alertMsg = `🔞 INAPPROPRIATE CONTENT DETECTED\n\nAdult/harmful websites found in browsing history (${adultPct}% of visits).\nSites: ${siteList}\n\nImmediate parental/self review recommended. Open ScreenSense for full report.`;
+
+      // Fire ntfy real push first (immediate popup on phone)
+      await sendNtfyPush({
+        title: '🔞 Inappropriate Content Alert',
+        body: alertMsg,
+        priority: 'urgent',
+        tags: ['warning','no_entry']
+      });
+
+      const sendRes = await fetch(`${F}/api/send_alert/${currentUser.uid}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          title: '🔞 Inappropriate Content Alert',
+          body: alertMsg,
+          priority: 'high',
+          type: 'popup',
+          adult_risk: true,
+          adult_pct: adultPct,
+        })
+      });
+      const sendData = await sendRes.json();
+      if (sendData.success) {
+        statusEl.style.color = '#ff4f6d';
+        statusEl.textContent = `🔞 Alert sent! ${adultSites.length} inappropriate site(s) detected.`;
+      } else throw new Error('Alert send failed');
+    } else {
+      statusEl.style.color = '#00e5a0';
+      statusEl.textContent = '✅ No inappropriate content detected in browsing history.';
+    }
+  } catch(e) {
+    statusEl.style.color = '#ffb347';
+    statusEl.textContent = `⚠️ Could not scan: ${e.message}`;
+  }
+};
+
+// ══════════════════════════════════════════════════════════════════
+// DEEP ANALYSIS MODAL
+// ══════════════════════════════════════════════════════════════════
+window.openDeepAnalysisModal = async () => {
+  openModal('deepAnalysisModal');
+  await loadDeepAnalysis(false);
+};
+
+window.loadDeepAnalysis = async (forceRefresh = false) => {
+  if (!currentUser) return;
+  const body = document.getElementById('deepAnalysisBody');
+  const btn  = document.getElementById('deepRefreshBtn');
+  body.innerHTML = `<div style="color:var(--text2);font-size:12px;text-align:center;padding:24px"><div style="font-size:28px;margin-bottom:8px">🔬</div>Running deep analysis…</div>`;
+  if (btn) { btn.textContent = '⏳'; btn.disabled = true; }
+
+  const st   = dataCache.today || {};
+  const apps = st.appUsage || st.appRisks || [];
+  const hourly = st.hourlyDistribution || {};
+
+  // ════════════════════════════════════════
+  // CATEGORY DEFINITIONS
+  // ════════════════════════════════════════
+  const CAT_DEFS = {
+    social:       { label:'Social Media',  icon:'📱', color:'#ff6b9d', group:'unproductive',
+      keywords:['instagram','whatsapp','telegram','snapchat','facebook','twitter','tiktok','linkedin','reddit','discord','honista','messenger','pinterest','tumblr'] },
+    entertainment:{ label:'Entertainment', icon:'🎬', color:'#ffb347', group:'unproductive',
+      keywords:['youtube','netflix','spotify','prime','hotstar','jio','mx','zee5','voot','sonyliv','vlc','music','gaana','wynk','jiosaavn','twitch','dailymotion'] },
+    gaming:       { label:'Gaming',        icon:'🎮', color:'#a78bfa', group:'unproductive',
+      keywords:['game','clash','pubg','roblox','freefire','bgmi','candy','subway','temple','ludo','chess','pokemon','minecraft','fortnite','valorant','among'] },
+    education:    { label:'Education',     icon:'📚', color:'#00d4ff', group:'productive',
+      keywords:['duolingo','coursera','udemy','khan','classroom','byju','unacademy','moodle','quizlet','studocu','notion','obsidian','anki','dictionary','encyclopedia','wikipedia'] },
+    productive:   { label:'Productivity',  icon:'💼', color:'#00e5a0', group:'productive',
+      keywords:['gmail','outlook','drive','docs','sheets','office','word','excel','powerpoint','zoom','meet','teams','calendar','slack','trello','jira','figma','github','vscode','terminal'] },
+    browser:      { label:'Browsing',      icon:'🌐', color:'#00d4ff', group:'neutral',
+      keywords:['chrome','firefox','browser','opera','samsung.internet','edge','brave','safari'] },
+    shopping:     { label:'Shopping',      icon:'🛒', color:'#ffd700', group:'unproductive',
+      keywords:['amazon','flipkart','meesho','myntra','ajio','swiggy','zomato','blinkit','zepto','nykaa','bigbasket'] },
+    adult_risk:   { label:'Adult / Harmful', icon:'🔞', color:'#ff4f6d', group:'risk',
+      keywords:['porn','xxx','adult','sex','nsfw','xvideos','xhamster','pornhub','onlyfans','redtube','youporn','betting','casino','gambling'] },
+    other:        { label:'Other',         icon:'📦', color:'#6c63ff', group:'neutral', keywords:[] },
+  };
+
+  // ── Categorize apps ───────────────────────────────────────────
+  const catTotals = Object.fromEntries(Object.keys(CAT_DEFS).map(k=>[k,0]));
+  const catApps   = Object.fromEntries(Object.keys(CAT_DEFS).map(k=>[k,[]]));
+  apps.forEach(a => {
+    const name = (a.app_name||a.appName||'').toLowerCase();
+    let matched = false;
+    for (const [cat, def] of Object.entries(CAT_DEFS)) {
+      if (def.keywords.some(kw => name.includes(kw))) {
+        catTotals[cat] += a.minutes||0; catApps[cat].push(a); matched=true; break;
+      }
+    }
+    if (!matched) { catTotals.other += a.minutes||0; catApps.other.push(a); }
+  });
+  const totalMins = Object.values(catTotals).reduce((s,v)=>s+v,0) || 1;
+
+  // ── Productive vs Unproductive totals ─────────────────────────
+  const prodMins   = catTotals.productive + catTotals.education;
+  const unprodMins = catTotals.social + catTotals.entertainment + catTotals.gaming + catTotals.shopping;
+  const riskMins   = catTotals.adult_risk;
+  const neutralMins= catTotals.browser + catTotals.other;
+  const prodPct    = +((prodMins/totalMins)*100).toFixed(0);
+  const unprodPct  = +((unprodMins/totalMins)*100).toFixed(0);
+  const riskPct    = +((riskMins/totalMins)*100).toFixed(0);
+
+  // ════════════════════════════════════════
+  // SECTION 1 — Summary Score Card
+  // ════════════════════════════════════════
+  const overallColor = riskPct > 0 ? '#ff4f6d' : unprodPct > 60 ? '#ffb347' : '#00e5a0';
+  const overallMsg   = riskPct > 0       ? '🚨 Harmful content detected in usage'
+                     : unprodPct > 70    ? '⚠️ Heavily unproductive usage pattern'
+                     : unprodPct > 40    ? '⚡ Moderate unproductive usage'
+                     : prodPct > 40      ? '✅ Healthy productive usage pattern'
+                     : '📊 Mixed usage — review categories below';
+
+  const s1 = `
+    <div style="background:${overallColor}10;border:1px solid ${overallColor}30;border-radius:12px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="font-size:30px">${riskPct>0?'🚨':unprodPct>60?'⚠️':'📊'}</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;color:var(--text1);margin-bottom:3px">Behavioural Overview</div>
+          <div style="font-size:11px;color:${overallColor};font-weight:600">${overallMsg}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:20px;font-weight:800;color:${overallColor}">${unprodPct}%</div>
+          <div style="font-size:9px;color:var(--text2)">unproductive</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px">
+        ${[
+          {label:'Productive', val:prodPct+'%',   color:'#00e5a0'},
+          {label:'Leisure',    val:unprodPct+'%', color:'#ffb347'},
+          {label:'Neutral',    val:((neutralMins/totalMins)*100).toFixed(0)+'%', color:'#6c63ff'},
+          {label:'Risk',       val:riskPct+'%',   color:'#ff4f6d'},
+        ].map(s=>`
+          <div style="background:rgba(255,255,255,.03);border:1px solid ${s.color}25;border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:14px;font-weight:800;color:${s.color}">${s.val}</div>
+            <div style="font-size:9px;color:var(--text2);margin-top:2px">${s.label}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  // ════════════════════════════════════════
+  // SECTION 2 — Social / Entertainment / Education / Adult Risk
+  // ════════════════════════════════════════
+  const guideCategories = ['social','entertainment','education','adult_risk'];
+  const s2 = `
+    <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px">
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:10px;letter-spacing:.08em">📂 SOCIAL · ENTERTAINMENT · EDUCATION · ADULT RISK</div>
+      ${guideCategories.map(k => {
+        const def  = CAT_DEFS[k];
+        const mins = catTotals[k];
+        const pct  = +((mins/totalMins)*100).toFixed(0);
+        const h    = Math.floor(mins/60), m = Math.round(mins%60);
+        const timeStr = mins > 0 ? (h>0?`${h}h ${m}m`:`${m}m`) : '0m';
+        const isRisk  = k === 'adult_risk';
+        const topApps = catApps[k].slice(0,4);
+        const riskNote = {
+          social:       pct>40 ? '⚠️ Exceeds 40% — digital addiction risk' : pct>25 ? '📊 Moderate social usage' : '✅ Healthy range',
+          entertainment:pct>35 ? '⚠️ High passive consumption detected'    : pct>20 ? '📊 Moderate entertainment' : '✅ Balanced',
+          education:    pct>30 ? '✅ Excellent — high educational usage'    : pct>10 ? '📚 Good educational habit' : '💡 Consider more educational content',
+          adult_risk:   mins>0 ? '🚨 IMMEDIATE ATTENTION REQUIRED'         : '✅ Clean — no harmful content detected',
+        }[k];
+        return `
+          <div style="
+            background:${isRisk&&mins>0?'rgba(255,79,109,.07)':'rgba(255,255,255,.03)'};
+            border:1px solid ${isRisk&&mins>0?'rgba(255,79,109,.3)':'rgba(255,255,255,.07)'};
+            border-left:3px solid ${def.color};border-radius:10px;padding:12px 14px;margin-bottom:8px
+          ">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <span style="font-size:20px">${def.icon}</span>
+              <div style="flex:1">
+                <div style="font-size:12px;font-weight:700;color:var(--text1)">${def.label}</div>
+                <div style="font-size:10px;color:${def.color};margin-top:1px">${riskNote}</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:18px;font-weight:800;color:${def.color}">${pct}%</div>
+                <div style="font-size:9px;color:var(--text2)">${timeStr}</div>
+              </div>
+            </div>
+            <div style="background:rgba(255,255,255,.05);border-radius:4px;height:6px;overflow:hidden;margin-bottom:8px">
+              <div style="width:${pct}%;height:100%;background:${def.color};border-radius:4px;transition:width .5s"></div>
+            </div>
+            ${topApps.length > 0 ? `
+              <div style="display:flex;flex-wrap:wrap;gap:5px">
+                ${topApps.map(a=>{
+                  const nm = a.clean_name||cleanAppName(a.app_name||a.appName||'App');
+                  const tm = Math.round(a.minutes||0);
+                  return `<span style="background:${def.color}15;border:1px solid ${def.color}30;color:${def.color};border-radius:20px;padding:2px 8px;font-size:9px">${nm} ${tm}m</span>`;
+                }).join('')}
+              </div>` : `<div style="font-size:10px;color:var(--text2)">${k==='adult_risk'?'✅ No flagged apps detected':'No apps in this category today'}</div>`}
+            ${isRisk && mins > 0 ? `
+              <button onclick="sendAdultContentAlert();closeModal('deepAnalysisModal')" style="
+                margin-top:10px;width:100%;background:rgba(255,79,109,.15);border:1px solid rgba(255,79,109,.35);
+                color:#ff4f6d;border-radius:7px;padding:8px;font-size:11px;font-weight:700;
+                cursor:pointer;font-family:inherit">🔔 Send Inappropriate Content Alert</button>` : ''}
+          </div>`;
+      }).join('')}
+    </div>`;
+
+  // ════════════════════════════════════════
+  // SECTION 3 — Productive vs Unproductive (visual bar)
+  // ════════════════════════════════════════
+  const pvuMsg = prodPct>50 ? '✅ Productive usage dominates — excellent digital habits'
+               : unprodPct>65 ? '⚠️ Over two-thirds of usage is unproductive — review habits'
+               : unprodPct>40 ? '📊 Moderate unproductive usage — room for improvement'
+               : '⚖️ Balanced usage mix';
+
+  const s3 = `
+    <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px">
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:10px;letter-spacing:.08em">⚖️ PRODUCTIVE vs UNPRODUCTIVE</div>
+      <div style="background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px">
+        <!-- Segmented bar -->
+        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;margin-bottom:12px;gap:2px">
+          ${prodPct>0   ?`<div style="width:${prodPct}%;background:#00e5a0;border-radius:3px" title="Productive ${prodPct}%"></div>`:''}
+          ${unprodPct>0 ?`<div style="width:${unprodPct}%;background:#ff4f6d;border-radius:3px" title="Unproductive ${unprodPct}%"></div>`:''}
+          ${riskPct>0   ?`<div style="width:${riskPct}%;background:#ff0040;border-radius:3px" title="Risk ${riskPct}%"></div>`:''}
+          <div style="flex:1;background:rgba(255,255,255,.08);border-radius:3px"></div>
+        </div>
+        <!-- Legend with app lists -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+              <div style="width:10px;height:10px;border-radius:2px;background:#00e5a0"></div>
+              <span style="font-size:10px;font-weight:700;color:#00e5a0">PRODUCTIVE ${prodPct}%</span>
+            </div>
+            <div style="font-size:10px;color:var(--text2);line-height:1.8">
+              ${[...catApps.productive,...catApps.education].slice(0,4).map(a=>
+                `• ${a.clean_name||cleanAppName(a.app_name||a.appName||'App')} (${Math.round(a.minutes||0)}m)`
+              ).join('<br>') || '• No productive apps today'}
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
+              <div style="width:10px;height:10px;border-radius:2px;background:#ff4f6d"></div>
+              <span style="font-size:10px;font-weight:700;color:#ff4f6d">UNPRODUCTIVE ${unprodPct}%</span>
+            </div>
+            <div style="font-size:10px;color:var(--text2);line-height:1.8">
+              ${[...catApps.social,...catApps.entertainment,...catApps.gaming].slice(0,4).map(a=>
+                `• ${a.clean_name||cleanAppName(a.app_name||a.appName||'App')} (${Math.round(a.minutes||0)}m)`
+              ).join('<br>') || '• No unproductive apps detected'}
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:${prodPct>50?'#00e5a0':unprodPct>60?'#ff4f6d':'#ffb347'};padding:8px;background:rgba(255,255,255,.03);border-radius:7px">${pvuMsg}</div>
+      </div>
+    </div>`;
+
+  // ════════════════════════════════════════
+  // SECTION 4 — App Addiction Severity Tiers
+  // ════════════════════════════════════════
+  const TIERS = [
+    { id:'critical', label:'🚨 Critical', desc:'≥2h + flagged high risk', color:'#ff4f6d', bg:'rgba(255,79,109,.08)', border:'rgba(255,79,109,.25)',
+      apps: apps.filter(a => (a.minutes||0)>=120 && ['high','moderate'].includes(a.risk_level||a.riskLevel||'')) },
+    { id:'severe',   label:'⚠️ Severe',   desc:'≥2h total usage',         color:'#ff6b35', bg:'rgba(255,107,53,.07)', border:'rgba(255,107,53,.2)',
+      apps: apps.filter(a => (a.minutes||0)>=120 && !['high','moderate'].includes(a.risk_level||a.riskLevel||'')) },
+    { id:'high',     label:'🔴 High',     desc:'1–2h usage',               color:'#ffb347', bg:'rgba(255,179,71,.07)', border:'rgba(255,179,71,.2)',
+      apps: apps.filter(a => (a.minutes||0)>=60  && (a.minutes||0)<120) },
+    { id:'moderate', label:'🟡 Moderate', desc:'30–60 min',                color:'#a78bfa', bg:'rgba(108,99,255,.07)', border:'rgba(108,99,255,.2)',
+      apps: apps.filter(a => (a.minutes||0)>=30  && (a.minutes||0)<60) },
+    { id:'low',      label:'🟢 Low',      desc:'< 30 min',                 color:'#00e5a0', bg:'rgba(0,229,160,.05)', border:'rgba(0,229,160,.18)',
+      apps: apps.filter(a => (a.minutes||0)<30) },
+  ];
+
+  const s4 = `
+    <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px">
+      <div style="font-size:10px;color:#a78bfa;font-weight:700;margin-bottom:10px;letter-spacing:.08em">🎯 APP ADDICTION SEVERITY TIERS</div>
+      ${TIERS.filter(t=>t.apps.length>0).map(t=>`
+        <div style="background:${t.bg};border:1px solid ${t.border};border-radius:9px;padding:11px 13px;margin-bottom:8px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;font-weight:700;color:${t.color}">${t.label}</span>
+              <span style="font-size:9px;background:${t.border};color:${t.color};padding:2px 7px;border-radius:4px">${t.desc}</span>
+            </div>
+            <span style="font-size:11px;color:var(--text2)">${t.apps.length} app${t.apps.length!==1?'s':''}</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${t.apps.slice(0,6).map(a=>{
+              const nm  = a.clean_name||cleanAppName(a.app_name||a.appName||'App');
+              const mins= Math.round(a.minutes||0);
+              const h=Math.floor(mins/60), m=mins%60;
+              const tm  = h>0?`${h}h${m>0?` ${m}m`:''}` : `${m}m`;
+              const rl  = a.risk_level||a.riskLevel||'';
+              return `
+                <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:6px">
+                  <span style="font-size:14px">${getAppIcon(a.app_name||a.appName||'')}</span>
+                  <div>
+                    <div style="font-size:10px;font-weight:700;color:var(--text1)">${nm}</div>
+                    <div style="font-size:9px;color:${t.color}">${tm}${rl?` · ${rl.toUpperCase()}`:''}
+                      <button onclick="sendAppAlert('${(a.app_name||a.appName||'').replace(/'/g,'')  }','${nm.replace(/'/g,'')}',${mins},'${rl||'moderate'}')" style="
+                        background:none;border:none;color:${t.color};font-size:9px;cursor:pointer;
+                        padding:0 0 0 4px;font-family:inherit;opacity:.8">🔔</button>
+                    </div>
+                  </div>
+                </div>`;
+            }).join('')}
+          </div>
+        </div>`).join('')}
+    </div>`;
+
+  // ════════════════════════════════════════
+  // SECTION 5 — Inappropriate Content (from history API)
+  // ════════════════════════════════════════
+  let s5 = '';
+  try {
+    const hRes  = await fetch(`${F}/api/history_insights/${currentUser.uid}`);
+    const hData = await hRes.json();
+    const adultPct   = hData.category_breakdown?.adult_risk?.pct || 0;
+    const adultCount = hData.category_breakdown?.adult_risk?.count || 0;
+    const adultDomains = (hData.top_domains||[]).filter(([d])=>
+      /porn|xxx|adult|sex|nsfw|xvideos|xhamster|pornhub|onlyfans|redtube|youporn|betting|casino|gambling/i.test(d));
+
+    s5 = `
+      <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px">
+        <div style="font-size:10px;color:#ff4f6d;font-weight:700;margin-bottom:10px;letter-spacing:.08em">🔞 INAPPROPRIATE / ADULT CONTENT SCAN</div>
+        ${adultPct > 0 || adultDomains.length > 0 ? `
+          <div style="background:rgba(255,79,109,.08);border:2px solid rgba(255,79,109,.3);border-radius:10px;padding:14px">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <span style="font-size:28px">🚨</span>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:#ff4f6d">Inappropriate Content Detected</div>
+                <div style="font-size:11px;color:var(--text2);margin-top:2px">${adultCount} visits · ${adultPct}% of browsing history</div>
+              </div>
+            </div>
+            ${adultDomains.length > 0 ? `
+              <div style="font-size:10px;color:var(--text2);margin-bottom:6px">Flagged domains:</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+                ${adultDomains.slice(0,5).map(([d,c])=>`<span style="background:rgba(255,79,109,.12);border:1px solid rgba(255,79,109,.3);color:#ff4f6d;border-radius:20px;padding:3px 10px;font-size:10px">${d} (${c})</span>`).join('')}
+              </div>` : ''}
+            <div style="display:flex;gap:8px">
+              <button onclick="sendAdultContentAlert()" style="
+                flex:1;background:rgba(255,79,109,.15);border:1px solid rgba(255,79,109,.35);
+                color:#ff4f6d;border-radius:7px;padding:8px;font-size:11px;font-weight:700;
+                cursor:pointer;font-family:inherit">🔔 Send Android Alert</button>
+              <button onclick="openModal('whatsappModal');closeModal('deepAnalysisModal')" style="
+                background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);
+                color:#25d366;border-radius:7px;padding:8px 12px;font-size:11px;font-weight:700;
+                cursor:pointer;font-family:inherit">💬 WhatsApp</button>
+            </div>
+          </div>` : `
+          <div style="background:rgba(0,229,160,.06);border:1px solid rgba(0,229,160,.2);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:24px">✅</span>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:#00e5a0">No Inappropriate Content Found</div>
+              <div style="font-size:11px;color:var(--text2);margin-top:2px">Browsing history is clean — no adult or harmful domains detected.</div>
+            </div>
+          </div>`}
+      </div>`;
+  } catch(e) {
+    s5 = `<div style="border-top:1px solid rgba(255,255,255,.07);padding-top:14px;color:var(--text2);font-size:11px">🔞 Could not scan browsing history — ensure Flask server is running.</div>`;
+  }
+
+  body.innerHTML = s1 + s2 + s3 + s4 + s5;
+  if (btn) { btn.textContent = '↺ Refresh'; btn.disabled = false; }
+};
+
+// Auto-check for inappropriate content when data loads
+async function checkInappropriateContent(uid) {
+  try {
+    const res  = await fetch(`${F}/api/history_insights/${uid}`);
+    const data = await res.json();
+    const adultPct = data.category_breakdown?.adult_risk?.pct || 0;
+    if (adultPct > 0) {
+      // Inject warning into notifications
+      const notifList = document.getElementById('notifList');
+      if (notifList) {
+        const warning = document.createElement('div');
+        warning.className = 'notif-item';
+        warning.style.cssText = 'border-top:1px solid rgba(255,79,109,.2);padding-top:8px;margin-top:4px;background:rgba(255,79,109,.05);border-radius:6px;padding:8px';
+        warning.innerHTML = `
+          <div class="notif-ico">🔞</div>
+          <div class="notif-body">
+            <div class="notif-title" style="color:#ff4f6d">Inappropriate Content Detected</div>
+            <div class="notif-sub">${adultPct}% of browsing history flagged as adult/harmful content</div>
+          </div>`;
+        notifList.prepend(warning);
+      }
+      // Show red dot
+      const dot = document.getElementById('notifDot');
+      if (dot) dot.style.display = 'block';
+    }
+  } catch(e) { /* silent — don't disrupt dashboard */ }
+}
+
+
+
+// ══════════════════════════════════════════════════════════════════
+// MULTI-USER SUPPORT
+// Stores up to 3 monitored user profiles in localStorage.
+// The "active" user drives all API calls and chart rendering.
+// ══════════════════════════════════════════════════════════════════
+
+const MAX_USERS = 3;
+const MU_KEY    = 'ss_monitored_users';   // localStorage key
+const MA_KEY    = 'ss_active_uid';        // localStorage key
+
+// ── Helpers ────────────────────────────────────────────────────────
+function getMUs()        { try { return JSON.parse(localStorage.getItem(MU_KEY) || '[]'); } catch(e) { return []; } }
+function saveMUs(arr)    { localStorage.setItem(MU_KEY, JSON.stringify(arr)); }
+function getActiveUID()  { return localStorage.getItem(MA_KEY) || ''; }
+function setActiveUID(u) { localStorage.setItem(MA_KEY, u); }
+
+function riskBadgeClass(level) {
+  return { high:'high', moderate:'moderate', low:'low', minimal:'minimal' }[level] || 'offline';
+}
+function riskBadgeLabel(level) {
+  return { high:'HIGH', moderate:'MOD', low:'LOW', minimal:'MIN' }[level] || '—';
+}
+
+// ── Register a user profile into the monitored list ────────────────
+function registerMonitoredUser(user, riskLevel, riskScore) {
+  const users  = getMUs();
+  const exists = users.find(u => u.uid === user.uid);
+  const entry  = {
+    uid:        user.uid,
+    name:       user.displayName || user.email?.split('@')[0] || 'User',
+    email:      user.email || '',
+    photoURL:   user.photoURL || '',
+    riskLevel:  riskLevel  || 'offline',
+    riskScore:  riskScore  || 0,
+    addedAt:    exists?.addedAt || Date.now()
+  };
+  if (exists) {
+    Object.assign(exists, entry);
+  } else {
+    if (users.length >= MAX_USERS) {
+      // Remove oldest non-active user
+      const oldest = users.filter(u => u.uid !== getActiveUID())
+                          .sort((a,b) => a.addedAt - b.addedAt)[0];
+      if (oldest) users.splice(users.indexOf(oldest), 1);
+    }
+    users.push(entry);
+  }
+  saveMUs(users);
+}
+
+// ── Update badge for a uid after data loads ────────────────────────
+function updateMUBadge(uid, riskLevel, riskScore) {
+  const users = getMUs();
+  const u = users.find(u => u.uid === uid);
+  if (u) { u.riskLevel = riskLevel; u.riskScore = riskScore; saveMUs(users); renderUserSwitcher(); }
+}
+
+// ── Render the sidebar slot list ───────────────────────────────────
+function renderUserSwitcher() {
+  const list      = document.getElementById('userSlotList');
+  if (!list) return;
+  const users     = getMUs();
+  const activeUID = getActiveUID();
+  let html = '';
+
+  users.forEach(u => {
+    const isActive = u.uid === activeUID;
+    const badge    = riskBadgeLabel(u.riskLevel);
+    const bClass   = riskBadgeClass(u.riskLevel);
+    const initials = (u.name?.[0] || '?').toUpperCase();
+    const avHTML   = u.photoURL
+      ? `<img src="${u.photoURL}" alt="${initials}"/>`
+      : initials;
+
+    html += `
+      <div class="uslot${isActive?' active':''}" onclick="switchToUser('${u.uid}')" title="${u.email}">
+        <div class="uslot-av">${avHTML}</div>
+        <div class="uslot-info">
+          <div class="uslot-name">${u.name}</div>
+          <div class="uslot-email">${u.email}</div>
+        </div>
+        <span class="uslot-badge ${bClass}">${badge}</span>
+        ${!isActive ? `<button class="uslot-rm" onclick="removeMonitoredUser(event,'${u.uid}')" title="Remove">✕</button>` : ''}
+      </div>`;
+  });
+
+  if (users.length < MAX_USERS) {
+    html += `
+      <div class="uslot-add" onclick="openAddUserModal()">
+        <div class="uslot-add-ico">＋</div>
+        <span>Add user (${users.length}/${MAX_USERS})</span>
+      </div>`;
+  }
+
+  list.innerHTML = html;
+}
+
+// ── Switch active user ─────────────────────────────────────────────
+window.switchToUser = async (uid) => {
+  if (uid === getActiveUID()) return;
+  const users = getMUs();
+  const target = users.find(u => u.uid === uid);
+  if (!target) return;
+
+  // Visual feedback
+  document.getElementById('shell')?.classList.add('switching');
+
+  setActiveUID(uid);
+  renderUserSwitcher();
+
+  // Update sidebar footer
+  document.getElementById('sbName').textContent = target.name;
+  document.getElementById('sbAv').innerHTML = target.photoURL
+    ? `<img src="${target.photoURL}" alt="${target.name[0]}"/>`
+    : target.name[0].toUpperCase();
+  if (document.getElementById('sbRole'))
+    document.getElementById('sbRole').textContent = uid === currentUser?.uid ? 'You' : 'Monitored';
+
+  // Wipe cache for this uid's range and reload
+  dataCache = { today: null, week: null, month: null };
+
+  // Reset range badge
+  document.getElementById('rangeBadge').textContent = 'Today';
+  document.querySelectorAll('.trb').forEach((b,i) => b.classList.toggle('active', i===0));
+  currentRange = 'today';
+
+  await fetchAndRender(uid, 'today', true);
+
+  setTimeout(() => document.getElementById('shell')?.classList.remove('switching'), 300);
+};
+
+// ── Remove a monitored user ────────────────────────────────────────
+window.removeMonitoredUser = (e, uid) => {
+  e.stopPropagation();
+  const users   = getMUs().filter(u => u.uid !== uid);
+  saveMUs(users);
+  // If removed user was active, switch back to signed-in user
+  if (getActiveUID() === uid && currentUser) {
+    setActiveUID(currentUser.uid);
+    dataCache = { today:null, week:null, month:null };
+    fetchAndRender(currentUser.uid, 'today', true);
+  }
+  renderUserSwitcher();
+};
+
+// ── Open Add User Modal ────────────────────────────────────────────
+window.openAddUserModal = () => {
+  openModal('addUserModal');
+  const users = getMUs();
+  const listEl = document.getElementById('addUserCurrentList');
+  if (!listEl) return;
+  listEl.innerHTML = users.map(u => `
+    <div style="display:flex;align-items:center;gap:8px;
+      background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+      border-radius:8px;padding:8px 10px">
+      <div style="width:24px;height:24px;border-radius:50%;
+        background:rgba(108,99,255,.3);display:flex;align-items:center;
+        justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0">
+        ${u.photoURL ? `<img src="${u.photoURL}" style="width:24px;height:24px;border-radius:50%;object-fit:cover"/>` : u.name[0].toUpperCase()}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:700;color:var(--text1)">${u.name}</div>
+        <div style="font-size:9px;color:var(--text2)">${u.email}</div>
+      </div>
+      <span style="font-size:8px;padding:2px 6px;border-radius:4px;font-weight:700;
+        background:rgba(0,229,160,.1);color:#00e5a0">
+        ${u.uid === currentUser?.uid ? 'YOU' : 'MONITORED'}
+      </span>
+    </div>`).join('') || `<div style="font-size:11px;color:var(--text2)">No users added yet.</div>`;
+
+  const addBtn = document.getElementById('addUserBtn');
+  if (addBtn) addBtn.textContent = users.length >= MAX_USERS
+    ? `⚠️ Max ${MAX_USERS} users reached — remove one first`
+    : '＋ Sign in with Another Google Account';
+};
+
+// ── Sign in a new account via Google popup and monitor it ──────────
+window.addNewMonitoredUser = async () => {
+  const users = getMUs();
+  if (users.length >= MAX_USERS) {
+    alert(`Maximum ${MAX_USERS} monitored users reached.\nRemove one from the sidebar first.`);
+    return;
+  }
+
+  const statusEl = document.getElementById('addUserStatus');
+  const btn      = document.getElementById('addUserBtn');
+  statusEl.style.display = 'block';
+  statusEl.style.color   = 'var(--text2)';
+  statusEl.textContent   = '⏳ Opening Google sign-in…';
+  if (btn) { btn.disabled = true; }
+
+  try {
+    const { GoogleAuthProvider, signInWithPopup } = await import(
+      'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js'
+    );
+    // Sign in without switching the main auth session —
+    // we use a secondary auth instance for the popup
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    const result   = await signInWithPopup(auth, provider);
+    const newUser  = result.user;
+
+    // Immediately re-restore the original signed-in user's session
+    // (signInWithPopup switches auth.currentUser — we revert via onAuthStateChanged)
+    // Register the new monitored user
+    registerMonitoredUser(newUser, 'offline', 0);
+    renderUserSwitcher();
+    openAddUserModal(); // refresh modal list
+
+    statusEl.style.color = '#00e5a0';
+    statusEl.textContent = `✅ Added ${newUser.displayName || newUser.email} as monitored user!`;
+
+    // Pre-fetch their risk data (background, best-effort)
+    try {
+      const r = await fetch(`${F}/api/user/${newUser.uid}`, { signal: AbortSignal.timeout(5000) });
+      if (r.ok) {
+        const d = await r.json();
+        const st = d.screenTimeData;
+        if (st) updateMUBadge(newUser.uid, st.riskLevel || 'low', st.riskScore || 0);
+      }
+    } catch(_) {}
+
+  } catch(err) {
+    statusEl.style.color = '#ff4f6d';
+    statusEl.textContent = err.code === 'auth/popup-closed-by-user'
+      ? '⚠️ Sign-in cancelled.'
+      : `❌ ${err.message}`;
+  } finally {
+    if (btn) { btn.disabled = false; }
+  }
+};
+
+// ── Boot: register the signed-in user and render switcher ─────────
+// Call this right after auth resolves (inside onAuthStateChanged success block)
+// Add these 3 lines at the END of your onAuthStateChanged success block,
+// just before the setTimeout that shows the shell:
+//
+//   registerMonitoredUser(user, null, null);
+//   if (!getActiveUID()) setActiveUID(user.uid);
+//   renderUserSwitcher();
+//
+// And patch fetchAndRender calls to use getActiveUID() when appropriate.
+// ──────────────────────────────────────────────────────────────────
+
+// ── Patch: after data loads, update the badge for active user ──────
+// Add this line at the end of renderRange() → inside the 'today' block:
+//   updateMUBadge(getActiveUID(), st.riskLevel||'low', st.riskScore||0);
+</script>
+</body>
+</html>
