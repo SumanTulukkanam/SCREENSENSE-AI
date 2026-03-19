@@ -1,0 +1,262 @@
+# 📱 ScreenSense AI — Digital Addiction & Screen-Time Behavior Analyzer
+
+> AI-Based Digital Addiction & Screen-Time Behavior Analyzer  
+> Department of Artificial Intelligence and Data Science  
+> SRM Valliammai Engineering College (An Autonomous Institution)
+
+---
+
+## 👥 Team
+
+| Register Number | Name |
+|---|---|
+| 1422222430037 | P. Rajesh |
+| 1422222430040 | M. Santhosh |
+| 1422222430047 | G. Sudharsan |
+| 1422222430048 | T. Suman |
+
+**Guide:** Mr. S. Srinivasan  
+**Domain:** Artificial Intelligence & Machine Learning  
+**Team ID:** 2025/2026/AI&DS/PW2-14
+
+---
+
+## 📌 Project Overview
+
+ScreenSense AI is an AI-powered screen-time monitoring and digital addiction detection system. It collects real-time app usage data from Android devices via ADB, analyzes behavioral patterns using a weighted ML scoring model, and delivers actionable insights through an interactive web dashboard powered by Groq's LLaMA 3.3 70B AI model.
+
+The system supports:
+- **Employee Productivity Monitoring** — Detect time wastage and non-productive app usage
+- **Parental Screen-Time Monitoring** — Track children's digital habits and flag high-risk behavior
+
+---
+
+## 🎯 Objectives
+
+1. Predict app-wise and overall screen-time usage
+2. Forecast daily and weekly usage patterns
+3. Detect digital addiction risk levels using ML
+4. Analyze user digital addiction behavior patterns
+5. Display insights through an interactive dashboard
+
+---
+
+## ⚙️ Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Python, Flask, Flask-CORS |
+| Frontend | HTML, CSS, JavaScript, Chart.js |
+| Database | Firebase Firestore |
+| Authentication | Firebase Auth (Email + Google OAuth) |
+| AI Insights | Groq API (LLaMA 3.3 70B) |
+| Data Extraction | Android Debug Bridge (ADB) |
+| Browsing Tracker | Chrome Extension (Manifest V3) |
+
+---
+
+## 🏗️ System Architecture
+
+```
+Android Device
+      │
+      │ ADB (dumpsys usagestats)
+      ▼
+Flask Backend (app.py)
+      │
+      ├── ML Risk Scoring (Weighted Algorithm)
+      ├── 7-Day Forecasting
+      ├── Groq AI Insights (LLaMA 3.3 70B)
+      │
+      ▼
+Firebase Firestore
+      │
+      ▼
+Web Dashboard (HTML/CSS/JS)
+      │
+      ├── Line Chart (Hourly Usage)
+      ├── Doughnut Chart (App Breakdown)
+      ├── Bar Chart (Weekly/Monthly)
+      ├── Gauge (Risk Score)
+      └── AI Insights Panel
+
+Chrome Extension
+      │
+      │ URL + Domain + Timestamp
+      ▼
+Flask → Firestore (web_usage collection)
+```
+
+---
+
+## 🤖 ML Model — Weighted Risk Scoring
+
+A custom weighted scoring algorithm with sigmoid normalization across **5 behavioral factors**:
+
+| Factor | Weight | Description |
+|---|---|---|
+| Screen Time | 35% | Daily total hours (sigmoid normalized) |
+| Social Media % | 25% | % of time on social apps |
+| Unlock Frequency | 20% | Phone unlocks per day |
+| Night Usage | 10% | Usage between 10PM–5AM |
+| App Concentration | 10% | Single app dominance % |
+
+**Risk Classification:**
+```
+75 – 100  →  High Risk
+50 – 74   →  Moderate Risk
+25 – 49   →  Low Risk
+0  – 24   →  Minimal Risk
+```
+
+---
+
+## 🧠 AI Model — Groq (LLaMA 3.3 70B)
+
+Used for two purposes:
+1. **Dashboard AI Insights** — Generates 3 behavioral insights with severity (high/medium/low) from screen-time data
+2. **Browsing History Insights** — Analyzes visited domains and generates browsing behavior insights with category breakdown
+
+---
+
+## 📂 Project Structure
+
+```
+screensense-ai/
+│
+├── index.html                  # Login & device connection page
+├── html/
+│   └── dashboard.html          # Main analytics dashboard
+├── css/
+│   ├── base.css                # Global styles
+│   ├── dashboard.css           # Dashboard styles
+│   └── index.css               # Login page styles
+├── assets/
+│   ├── srm.jpg                 # SRM logo
+│   └── srm logo.jpg            # SRM logo alternate
+├── app.py                      # Flask backend (main server)
+├── serviceAccountKey.json      # Firebase Admin SDK key (not committed)
+├── extension/
+│   ├── manifest.json           # Chrome extension manifest
+│   └── background.js           # Extension service worker
+└── README.md
+```
+
+---
+
+## 🚀 Setup & Installation
+
+### Prerequisites
+- Python 3.8+
+- Android Debug Bridge (ADB) installed and in PATH
+- Firebase project with Firestore enabled
+- Groq API key
+- Chrome browser (for extension)
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/screensense-ai.git
+cd screensense-ai
+```
+
+### 2. Install Python Dependencies
+```bash
+pip install flask flask-cors firebase-admin groq
+```
+
+### 3. Firebase Setup
+- Go to [Firebase Console](https://console.firebase.google.com)
+- Create a project and enable **Firestore** and **Authentication**
+- Download `serviceAccountKey.json` and place it in the root directory
+
+### 4. Configure Groq API
+In `app.py`, replace:
+```python
+GROQ_API_KEY = "your_groq_api_key_here"
+```
+Get your key from [console.groq.com](https://console.groq.com)
+
+### 5. Run the Flask Backend
+```bash
+python app.py
+```
+Server runs at `http://127.0.0.1:5000`
+
+### 6. Open the Frontend
+Open `index.html` in your browser or serve via Live Server.
+
+### 7. Install Chrome Extension
+- Go to `chrome://extensions`
+- Enable **Developer Mode**
+- Click **Load Unpacked** → select the `extension/` folder
+
+---
+
+## 📱 How to Use
+
+1. **Sign in** using Email/Password or Google OAuth
+2. **Connect your Android phone** via USB with USB Debugging enabled
+3. Click **Detect Device** — your phone model will appear
+4. Click **Start Analysis** — data collection begins automatically
+5. Wait for progress to complete → **Dashboard opens automatically**
+6. View your screen-time stats, risk score, AI insights, and browsing history
+
+### USB Debugging Setup (Android)
+```
+Settings → About Phone → tap Build Number 7 times
+Settings → Developer Options → USB Debugging → ON
+Connect USB cable → tap ALLOW on phone
+```
+
+---
+
+## 🔌 API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/status` | Check ADB device status |
+| POST | `/api/connect` | Connect device (USB/WiFi) |
+| POST | `/api/trigger/<uid>` | Start data collection |
+| GET | `/api/collection_status/<uid>` | Poll collection progress |
+| GET | `/api/user/<uid>` | Get screen-time data |
+| GET | `/api/ai_insights/<uid>` | Get Groq AI insights |
+| GET | `/api/history/<uid>` | Get browsing history |
+| GET | `/api/history_insights/<uid>` | Get AI browsing insights |
+| POST | `/api/send_alert/<uid>` | Send push alert to phone |
+| POST | `/api/web_usage` | Receive URL from extension |
+| GET | `/api/health` | Server health check |
+
+---
+
+## 📊 Dashboard Features
+
+- **Stat Cards** — Total screen time, most used app, URLs visited, risk score
+- **Hourly Line Chart** — Usage distribution across 24 hours
+- **App Doughnut Chart** — Per-app share of screen time
+- **App Usage Table** — Detailed breakdown with risk badges and alert buttons
+- **Addiction Risk Gauge** — Visual 0–100 ML risk score
+- **Weekly/Monthly Bar Chart** — Daily totals trend
+- **7-Day Forecast** — Predicted usage for the week
+- **AI Insights Panel** — 3 Groq-powered behavioral insights
+- **Browsing History** — Recent, most visited, 30-day history with AI analysis
+- **Goals Modal** — Track personal screen-time goals
+- **Risk Report Modal** — Detailed ML factor breakdown
+- **Notifications** — Rule-based + AI-powered alert system
+
+---
+
+## 📤 Outcomes
+
+- Functional AI-based system for monitoring screen-time behavior
+- Accurate prediction of app-wise and overall usage patterns
+- Early detection of digital addiction risk using ML techniques
+- Automated warning messages when excessive usage is identified
+- Interactive dashboard with clear visual analytics and reports
+
+---
+
+## 📝 License
+
+This project is developed for academic purposes under  
+**SRM Valliammai Engineering College — Department of AI & DS**  
+Project Work Phase II — even Semester 2025–2026
